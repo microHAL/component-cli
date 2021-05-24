@@ -101,21 +101,6 @@ class CliParser {
     inline static int argumentsCount(std::list<char *> &words) { return words.size(); }
 };
 
-template <typename Type>
-class NumericParser {
-    NumericParser(Type min, Type max, uint_fast8_t base = 10);
-
-    ParserStatus parse(std::list<char *> &words);
-
- private:
-    Type min;
-    Type max;
-    Type parsedValue;
-    char shortCommand;
-    std::string_view command;
-    std::string_view help;
-};
-
 }  // namespace microhal
 
 #endif /* MICROHAL_CLI_GETOPT__CPP_ */
