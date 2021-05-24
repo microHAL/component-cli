@@ -41,9 +41,8 @@ class NumericParser : public Argument {
     constexpr NumericParser(char shotCommand, string_view command, string_view name, string_view help, Type min, Type max, uint_fast8_t base = 10)
         : Argument(shotCommand, command, name, help), base(base), min(min), max(max) {}
 
-    ParserStatus parse(string_view str) final {
-        str.remove_prefix(str.find_first_not_of(' '));
-        if (auto pos = str.find_last_not_of(' '); pos != str.npos) str.remove_suffix(str.size() - pos - 1);
+    [[nodiscard]] ParserStatus parse(string_view str) final {
+        str = removeSpaces(str);
         if (str.find(' ') != str.npos) return ParserStatus::Error;
 
         auto [value, error] = fromStringView<Type>(str, base, min, max);
@@ -52,7 +51,7 @@ class NumericParser : public Argument {
         return ParserStatus::Success;
     }
 
-    Type value() const { return parsedValue; }
+    [[nodiscard]] Type value() const { return parsedValue; }
 
  private:
     const uint_fast8_t base;

@@ -33,8 +33,7 @@ namespace cli {
 IPMaskParser::ParserStatus IPMaskParser::parse(string_view str) {
     // Parse string: 255.255.255.0
 
-    str.remove_prefix(str.find_first_not_of(' '));
-    if (auto pos = str.find_last_not_of(' '); pos != str.npos) str.remove_suffix(str.size() - pos - 1);
+    str = removeSpaces(str);
     for (uint_fast8_t i = 0; i < 4; i++) {
         auto dotPos = str.find('.');
         auto number = str.substr(0, dotPos);

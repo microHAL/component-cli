@@ -44,7 +44,8 @@ class EnumParser : public Argument {
 
     constexpr ~EnumParser() = default;
 
-    constexpr ParserStatus parse(string_view str) final {
+    [[nodiscard]] constexpr ParserStatus parse(string_view str) final {
+        str = removeSpaces(str);
         auto result = map.keyFor(str);
         if (result.ec == std::errc()) {
             m_key = result.key;
@@ -53,7 +54,7 @@ class EnumParser : public Argument {
         return ParserStatus::Error;
     }
 
-    string_view formatArgument(std::span<char> buffer) final {
+    [[nodiscard]] string_view formatArgument(std::span<char> buffer) final {
         buffer[0] = '[';
         buffer[1] = '-';
         char *ptr = &buffer[3];
@@ -80,7 +81,7 @@ class EnumParser : public Argument {
         return {buffer.data(), ptr};
     }
 
-    key_t key() const { return m_key; }
+    [[nodiscard]] key_t key() const { return m_key; }
 
  private:
     const Map map;

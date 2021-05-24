@@ -46,21 +46,21 @@ class Argument {
 
     enum class ParserStatus { Error, Success };
 
-    constexpr virtual ParserStatus parse(string_view str) = 0;
+    [[nodiscard]] constexpr virtual ParserStatus parse(string_view str) = 0;
 
-    int_fast8_t correctCommand(string_view cmd);
-    virtual string_view formatArgument(std::span<char> buffer);
+    [[nodiscard]] int_fast8_t correctCommand(string_view cmd);
+    [[nodiscard]] virtual string_view formatArgument(std::span<char> buffer);
 
-    string_view formatHelpEntry(std::span<char> buffer);
-    string_view helpText() const { return help; }
+    [[nodiscard]] string_view formatHelpEntry(std::span<char> buffer);
+    [[nodiscard]] string_view helpText() const { return help; }
 
  protected:
     constexpr Argument(signed char shortCommand, string_view command, string_view name, string_view help)
         : shortCommand(shortCommand), command(command), name(name), help(help) {}
 
     template <typename Type>
-    static auto fromStringView(string_view str, uint_fast8_t base = 10, Type min = std::numeric_limits<Type>::min(),
-                               Type max = std::numeric_limits<Type>::max()) {
+    [[nodiscard]] static auto fromStringView(string_view str, uint_fast8_t base = 10, Type min = std::numeric_limits<Type>::min(),
+                                             Type max = std::numeric_limits<Type>::max()) {
         Type result;
         auto [ptr, error] = std::from_chars(str.begin(), str.end(), result, base);
         struct OUT {
@@ -71,8 +71,16 @@ class Argument {
         return OUT{result, (error == std::errc()) ? ParserStatus::Success : ParserStatus::Error};
     }
 
+    [[nodiscard]] constexpr static string_view removeSpaces(string_view str) {
+        // remove leading spaces
+        if (auto pos = str.find_first_not_of(' '); pos != str.npos) str.remove_prefix(pos);
+        // remove trailing spaces
+        if (auto pos = str.find_last_not_of(' '); pos != str.npos) str.remove_suffix(str.size() - pos - 1);
+        return str;
+    }
+
     signed char shortCommand;
-    const std::string_view command;
+    const string_view command;
     string_view name;
     string_view help;
 };

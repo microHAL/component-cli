@@ -39,14 +39,14 @@ class IPMaskParser : public Argument {
  public:
     constexpr IPMaskParser(string_view command, string_view name, string_view help) : Argument(-1, command, name, help) {}
 
-    ParserStatus parse(string_view str) final;
+    [[nodiscard]] ParserStatus parse(string_view str) final;
 
-    std::optional<const IP> mask() const { return m_ip; }
+    [[nodiscard]] std::optional<const IP> mask() const { return m_ip; }
 
  private:
     IP m_ip{};
 
-    static bool validateMask(IP mask);
+    [[nodiscard]] static bool validateMask(IP mask);
 };
 
 }  // namespace cli
