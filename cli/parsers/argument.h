@@ -55,7 +55,7 @@ class Argument {
     string_view helpText() const { return help; }
 
  protected:
-    constexpr Argument(char shortCommand, string_view command, string_view name, string_view help)
+    constexpr Argument(signed char shortCommand, string_view command, string_view name, string_view help)
         : shortCommand(shortCommand), command(command), name(name), help(help) {}
 
     template <typename Type>
@@ -71,7 +71,7 @@ class Argument {
         return OUT{result, (error == std::errc()) ? ParserStatus::Success : ParserStatus::Error};
     }
 
-    char shortCommand;
+    signed char shortCommand;
     const std::string_view command;
     string_view name;
     string_view help;
