@@ -39,8 +39,8 @@ class EnumParser : public Argument {
  public:
     using key_t = typename Map::key_t;
 
-    constexpr EnumParser(Map &map, char shortCommand, string_view command, string_view name, string_view help)
-        : Argument(shortCommand, command, name, help), map(map) {}
+    constexpr EnumParser(Map &map, char shortCommand, string_view command, string_view help)
+        : Argument(shortCommand, command, "{...}", help), map(map) {}
 
     constexpr ~EnumParser() = default;
 
@@ -53,12 +53,39 @@ class EnumParser : public Argument {
         return ParserStatus::Error;
     }
 
+    string_view formatArgument(std::span<char> buffer) final {
+        buffer[0] = '[';
+        buffer[1] = '-';
+        char *ptr = &buffer[3];
+        if (shortCommand > 0) {
+            buffer[2] = shortCommand;
+        } else {
+            buffer[2] = '-';
+            ptr = std::copy_n(command.begin(), command.size(), &buffer[3]);
+        }
+
+        size_t spaceLeft = buffer.data() + buffer.size() - ptr;
+        if (spaceLeft < 3) return {buffer.data(), ptr};
+        *ptr++ = ' ';
+        *ptr++ = '{';
+        for (auto &x : map) {
+            if (spaceLeft < x.second.size() + 1) break;
+            ptr = std::copy_n(x.second.begin(), x.second.size(), ptr);
+            *ptr++ = ',';
+            spaceLeft -= x.second.size() + 1;
+        }
+        *(ptr - 1) = '}';
+        *ptr++ = ']';
+
+        return {buffer.data(), ptr};
+    }
+
     key_t key() const { return m_key; }
 
  private:
     const Map map;
     key_t m_key{};
-};
+};  // namespace cli
 
 }  // namespace cli
 }  // namespace microhal

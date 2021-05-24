@@ -85,21 +85,25 @@ Argument::string_view Argument::formatHelpEntry(std::span<char> buffer) {
     if (buffer.size() < requiredSize) return {};
 
     auto last = buffer.data();
-    *last++ = ' ';
     if (shortCommand > 0) {
+        *last++ = ' ';
         *last++ = '-';
         *last++ = shortCommand;
-        *last++ = ' ';
-        last = std::copy_n(name.begin(), name.size(), last);
-        *last++ = ',';
-        *last++ = ' ';
+        if (name.size()) {
+            *last++ = ' ';
+            last = std::copy_n(name.begin(), name.size(), last);
+        }
+        if (command.size()) *last++ = ',';
     }
     if (command.size()) {
+        *last++ = ' ';
         *last++ = '-';
         *last++ = '-';
         last = std::copy_n(command.begin(), command.size(), last);
-        *last++ = ' ';
-        last = std::copy_n(name.begin(), name.size(), last);
+        if (name.size()) {
+            *last++ = ' ';
+            last = std::copy_n(name.begin(), name.size(), last);
+        }
     }
     return {buffer.data(), last};
 }

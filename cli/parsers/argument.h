@@ -49,7 +49,7 @@ class Argument {
     constexpr virtual ParserStatus parse(string_view str) = 0;
 
     int_fast8_t correctCommand(string_view cmd);
-    string_view formatArgument(std::span<char> buffer);
+    virtual string_view formatArgument(std::span<char> buffer);
 
     string_view formatHelpEntry(std::span<char> buffer);
     string_view helpText() const { return help; }
