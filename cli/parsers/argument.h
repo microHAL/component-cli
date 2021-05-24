@@ -46,20 +46,21 @@ class Argument {
 
     enum class ParserStatus { Error, Success };
 
-    virtual ParserStatus parse(string_view str) = 0;
+    constexpr virtual ParserStatus parse(string_view str) = 0;
 
     int_fast8_t correctCommand(string_view cmd);
     string_view formatArgument(std::span<char> buffer);
 
-    std::array<string_view, 2> formatHelp(std::span<char> buffer);
+    string_view formatHelpEntry(std::span<char> buffer);
+    string_view helpText() const { return help; }
 
  protected:
     constexpr Argument(char shortCommand, string_view command, string_view name, string_view help)
         : shortCommand(shortCommand), command(command), name(name), help(help) {}
 
     template <typename Type>
-    auto fromStringView(string_view str, uint_fast8_t base = 10, Type min = std::numeric_limits<Type>::min(),
-                        Type max = std::numeric_limits<Type>::max()) {
+    static auto fromStringView(string_view str, uint_fast8_t base = 10, Type min = std::numeric_limits<Type>::min(),
+                               Type max = std::numeric_limits<Type>::max()) {
         Type result;
         auto [ptr, error] = std::from_chars(str.begin(), str.end(), result, base);
         struct OUT {

@@ -25,31 +25,50 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_CLI_PARSERS_IPMASKPARSER_H_
-#define SRC_CLI_PARSERS_IPMASKPARSER_H_
-
-#include <optional>
-#include "argument.h"
-#include "commonTypes/ip.h"
+#include "ipMaskParser.h"
 
 namespace microhal {
 namespace cli {
 
-class IPMaskParser : public Argument {
- public:
-    constexpr IPMaskParser(string_view command, string_view name, string_view help) : Argument(-1, command, name, help) {}
+IPMaskParser::ParserStatus IPMaskParser::parse(string_view str) {
+    // Parse string: 255.255.255.0
 
-    ParserStatus parse(string_view str) final;
+    str.remove_prefix(str.find_first_not_of(' '));
+    if (auto pos = str.find_last_not_of(' '); pos != str.npos) str.remove_suffix(str.size() - pos - 1);
+    for (uint_fast8_t i = 0; i < 4; i++) {
+        auto dotPos = str.find('.');
+        auto number = str.substr(0, dotPos);
+        if (number.find(' ') != number.npos) return ParserStatus::Error;
+        auto [value, error] = fromStringView<uint8_t>(number);
+        if (error != ParserStatus::Success) return ParserStatus::Error;
+        m_ip.ip[3 - i] = value;
+        str.remove_prefix(dotPos + 1);
+    }
 
-    std::optional<const IP> mask() const { return m_ip; }
+    return validateMask(m_ip) ? ParserStatus::Success : ParserStatus::Error;
+}
 
- private:
-    IP m_ip{};
+bool IPMaskParser::validateMask(IP mask) {
+    uint32_t tmp = mask.asUint32_t();
 
-    static bool validateMask(IP mask);
-};
+    bool expectZeros = true;
+    if (tmp & 0b1) {
+        // LSB is equal 1, so mask should be exual 255.255.255.255
+        return tmp == IP{255, 255, 255, 255}.asUint32_t();
+    }
+
+    for (uint_fast8_t pos = 0; pos < 32; pos++) {
+        if (expectZeros) {
+            if (tmp & 0b1) {
+                expectZeros = false;
+            }
+        } else {
+            if (!(tmp & 0b1)) return false;
+        }
+        tmp >>= 1;
+    }
+    return true;
+}
 
 }  // namespace cli
 }  // namespace microhal
-
-#endif /* SRC_CLI_PARSERS_IPMASKPARSER_H_ */

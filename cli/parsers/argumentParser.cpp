@@ -68,13 +68,13 @@ void ArgumentParser::parse(std::string_view argumentsString, IODevice &ioDevice)
 }
 
 void ArgumentParser::showUsage(IODevice &ioDevice) {
-    constexpr auto usage = "usage: "sv;
-    constexpr auto endl = "\n\r"sv;
+    constexpr std::string_view usage = "usage: ";
+    constexpr std::string_view endl = "\n\r";
     ioDevice.write(usage);
     ioDevice.write(name);
     for (auto argument : arguments) {
         ioDevice.putChar(' ');
-        char buffer[20];
+        char buffer[30];
         auto result = argument->formatArgument(buffer);
         ioDevice.write(result);
     }
@@ -82,16 +82,24 @@ void ArgumentParser::showUsage(IODevice &ioDevice) {
     ioDevice.write(endl);
     ioDevice.write(description);
 
+    ioDevice.write(endl);
+    ioDevice.write(endl);
+    ioDevice.write("optional arguments:\n\r -h, --help         show this help message and exit"sv);
     auto spaces = "                    "sv;
     for (auto argument : arguments) {
         ioDevice.write(endl);
-        ioDevice.write(endl);
-        char buffer[20];
-        auto result = argument->formatHelp(buffer);
-        ioDevice.write(result[0]);
-        ioDevice.write(spaces.substr(0, spaces.size() - result[0].size()));
-        ioDevice.write(result[1]);
+        char buffer[40];
+        auto result = argument->formatHelpEntry(buffer);
+        ioDevice.write(result);
+        if (result.size() > 20) {
+            ioDevice.write(endl);
+            ioDevice.write(spaces);
+        } else {
+            ioDevice.write(spaces.substr(0, spaces.size() - result.size()));
+        }
+        ioDevice.write(argument->helpText());
     }
+    ioDevice.write(endl);
 }
 
 bool ArgumentParser::isHelpArgument(std::string_view argument) {

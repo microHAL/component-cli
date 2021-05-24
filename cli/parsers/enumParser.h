@@ -25,31 +25,42 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_CLI_PARSERS_IPMASKPARSER_H_
-#define SRC_CLI_PARSERS_IPMASKPARSER_H_
+#ifndef SRC_CLI_PARSERS_ENUMPARSER_H_
+#define SRC_CLI_PARSERS_ENUMPARSER_H_
 
 #include <optional>
 #include "argument.h"
-#include "commonTypes/ip.h"
 
 namespace microhal {
 namespace cli {
 
-class IPMaskParser : public Argument {
+template <typename Map>
+class EnumParser : public Argument {
  public:
-    constexpr IPMaskParser(string_view command, string_view name, string_view help) : Argument(-1, command, name, help) {}
+    using key_t = typename Map::key_t;
 
-    ParserStatus parse(string_view str) final;
+    constexpr EnumParser(Map &map, char shortCommand, string_view command, string_view name, string_view help)
+        : Argument(shortCommand, command, name, help), map(map) {}
 
-    std::optional<const IP> mask() const { return m_ip; }
+    constexpr ~EnumParser() = default;
+
+    constexpr ParserStatus parse(string_view str) final {
+        auto result = map.keyFor(str);
+        if (result.ec == std::errc()) {
+            m_key = result.key;
+            return ParserStatus::Success;
+        }
+        return ParserStatus::Error;
+    }
+
+    key_t key() const { return m_key; }
 
  private:
-    IP m_ip{};
-
-    static bool validateMask(IP mask);
+    const Map map;
+    key_t m_key{};
 };
 
 }  // namespace cli
 }  // namespace microhal
 
-#endif /* SRC_CLI_PARSERS_IPMASKPARSER_H_ */
+#endif /* SRC_CLI_PARSERS_ENUMPARSER_H_ */

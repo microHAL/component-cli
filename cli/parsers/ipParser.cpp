@@ -41,7 +41,7 @@ IPParser::ParserStatus IPParser::parse(string_view str) {
         if (number.find(' ') != number.npos) return ParserStatus::Error;
         auto [value, error] = fromStringView<uint8_t>(number);
         if (error != ParserStatus::Success) return ParserStatus::Error;
-        m_ip.ip[i] = value;
+        m_ip.ip[3 - i] = value;
         str.remove_prefix(dotPos + 1);
     }
     return ParserStatus::Success;

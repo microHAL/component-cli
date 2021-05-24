@@ -79,12 +79,18 @@ Argument::string_view Argument::formatArgument(std::span<char> buffer) {
     return {};
 }
 
-std::array<Argument::string_view, 2> Argument::formatHelp(std::span<char> buffer) {
+Argument::string_view Argument::formatHelpEntry(std::span<char> buffer) {
+    auto requiredSize = shortCommand > 0 ? name.size() + 6 : 1;
+    requiredSize += command.size() ? command.size() + name.size() + 3 : 0;
+    if (buffer.size() < requiredSize) return {};
+
     auto last = buffer.data();
     *last++ = ' ';
     if (shortCommand > 0) {
         *last++ = '-';
         *last++ = shortCommand;
+        *last++ = ' ';
+        last = std::copy_n(name.begin(), name.size(), last);
         *last++ = ',';
         *last++ = ' ';
     }
@@ -92,8 +98,10 @@ std::array<Argument::string_view, 2> Argument::formatHelp(std::span<char> buffer
         *last++ = '-';
         *last++ = '-';
         last = std::copy_n(command.begin(), command.size(), last);
+        *last++ = ' ';
+        last = std::copy_n(name.begin(), name.size(), last);
     }
-    return std::array<string_view, 2>{string_view{buffer.data(), last}, help};
+    return {buffer.data(), last};
 }
 
 }  // namespace cli
