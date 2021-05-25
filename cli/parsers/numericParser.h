@@ -28,6 +28,7 @@
 #ifndef SRC_CLI_NUMERICPARSER_H_
 #define SRC_CLI_NUMERICPARSER_H_
 
+#include <cmath>
 #include <cstdint>
 #include <string_view>
 #include "argument.h"
@@ -60,6 +61,36 @@ class NumericParser : public Argument {
     const Type min;
     const Type max;
     Type parsedValue{};
+};
+
+template <>
+class NumericParser<float> : public Argument {
+ public:
+    constexpr NumericParser(char shotCommand, string_view command, string_view name, string_view help, float min, float max)
+        : Argument(shotCommand, command, name, help), min(min), max(max) {}
+
+    [[nodiscard]] Status parse(string_view str) final;
+    [[nodiscard]] float value() const { return parsedValue; }
+
+ private:
+    const float min;
+    const float max;
+    float parsedValue = NAN;
+};
+
+template <>
+class NumericParser<double> : public Argument {
+ public:
+    constexpr NumericParser(char shotCommand, string_view command, string_view name, string_view help, double min, double max)
+        : Argument(shotCommand, command, name, help), min(min), max(max) {}
+
+    [[nodiscard]] Status parse(string_view str) final;
+    [[nodiscard]] double value() const { return parsedValue; }
+
+ private:
+    const double min;
+    const double max;
+    double parsedValue{};
 };
 
 }  // namespace cli
