@@ -30,20 +30,21 @@
 namespace microhal {
 namespace cli {
 
-IPParser::ParserStatus IPParser::parse(string_view str) {
+Status IPParser::parse(string_view str) {
     // Parse string: 192.168.11.1
 
     str = removeSpaces(str);
+    if (str.size() == 0) return Status::MissingArgument;
     for (uint_fast8_t i = 0; i < 4; i++) {
         auto dotPos = str.find('.');
         auto number = str.substr(0, dotPos);
-        if (number.find(' ') != number.npos) return ParserStatus::Error;
+        if (number.find(' ') != number.npos) return Status::Error;
         auto [value, error] = fromStringView<uint8_t>(number);
-        if (error != ParserStatus::Success) return ParserStatus::Error;
+        if (error != Status::Success) return Status::IncorectArgument;
         m_ip.ip[3 - i] = value;
         str.remove_prefix(dotPos + 1);
     }
-    return ParserStatus::Success;
+    return Status::Success;
 }
 
 }  // namespace cli

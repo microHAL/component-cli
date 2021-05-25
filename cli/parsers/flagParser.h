@@ -39,13 +39,13 @@ class FlagParser : public Argument {
     constexpr FlagParser(signed char shortCommand, string_view command, string_view help) : Argument(shortCommand, command, {}, help) {}
     constexpr ~FlagParser() = default;
 
-    [[nodiscard]] constexpr ParserStatus parse(string_view str) final {
+    [[nodiscard]] constexpr Status parse(string_view str) final {
         str = removeSpaces(str);
         if (str.size() == 0) {
             flag = true;
-            return ParserStatus::Success;
+            return Status::Success;
         }
-        return ParserStatus::Error;
+        return Status::Error;
     }
 
     [[nodiscard]] constexpr bool value() const noexcept { return flag; }

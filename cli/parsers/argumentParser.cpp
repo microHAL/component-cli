@@ -33,7 +33,7 @@ using namespace std::literals;
 namespace microhal {
 namespace cli {
 
-void ArgumentParser::parse(std::string_view argumentsString, IODevice &ioDevice) {
+Status ArgumentParser::parse(std::string_view argumentsString, IODevice &ioDevice) {
     // remove leading and trailing spaces
     argumentsString.remove_prefix(argumentsString.find_first_not_of(' '));
     if (auto pos = argumentsString.find_last_not_of(' '); pos != argumentsString.npos)
@@ -41,18 +41,19 @@ void ArgumentParser::parse(std::string_view argumentsString, IODevice &ioDevice)
 
     // decode all parameters
     do {
-        auto pos = argumentsString.find('-');
+        const auto pos = argumentsString.find('-');
         if (pos != argumentsString.npos) {
-            auto argument = argumentsString.substr(pos, argumentsString.find(' ', pos));
+            const auto argument = argumentsString.substr(pos, argumentsString.find(' ', pos));
             if (isHelpArgument(argument)) {
                 showUsage(ioDevice);
-                return;
+                return Status::HelpRequested;
             }
             bool argumentConsumed = false;
             for (auto &arg : arguments) {
                 if (auto parameterCount = arg->correctCommand(argument); parameterCount >= 0) {
-                    auto parameter = getParameters(argumentsString.substr(pos + argument.size()), parameterCount);
-                    arg->parse(parameter);
+                    const auto parameter = getParameters(argumentsString.substr(pos + argument.size()), parameterCount);
+                    if (auto status = arg->parse(parameter); status != Status::Success) return status;
+
                     argumentsString.remove_prefix(std::distance(argumentsString.begin(), parameter.end()));
                     argumentConsumed = true;
                     break;
@@ -61,15 +62,16 @@ void ArgumentParser::parse(std::string_view argumentsString, IODevice &ioDevice)
             if (!argumentConsumed) {
                 ioDevice.write("\n\r\tUnrecognized parameter: "sv);
                 ioDevice.write(argument);
-                return;  // error::unrecognizedParameter;
+                return Status::UnrecognizedParameter;
             }
         }
     } while (argumentsString.size());
+    return Status::Success;
 }
 
 void ArgumentParser::showUsage(IODevice &ioDevice) {
-    constexpr std::string_view usage = "usage: ";
-    constexpr std::string_view endl = "\n\r";
+    constexpr const std::string_view usage = "usage: ";
+    constexpr const std::string_view endl = "\n\r";
     ioDevice.write(usage);
     ioDevice.write(name);
     for (auto argument : arguments) {
@@ -85,11 +87,11 @@ void ArgumentParser::showUsage(IODevice &ioDevice) {
     ioDevice.write(endl);
     ioDevice.write(endl);
     ioDevice.write("optional arguments:\n\r -h, --help         show this help message and exit"sv);
-    auto spaces = "                    "sv;
+    static constexpr const auto spaces = "                    "sv;
     for (auto argument : arguments) {
         ioDevice.write(endl);
         char buffer[40];
-        auto result = argument->formatHelpEntry(buffer);
+        const auto result = argument->formatHelpEntry(buffer);
         ioDevice.write(result);
         if (result.size() > 20) {
             ioDevice.write(endl);

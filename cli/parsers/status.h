@@ -25,70 +25,32 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_CLI_PARSERS_ENUMPARSER_H_
-#define SRC_CLI_PARSERS_ENUMPARSER_H_
-
-#include <optional>
-#include "argument.h"
+#ifndef SRC_CLI_PARSERS_STATUS_H_
+#define SRC_CLI_PARSERS_STATUS_H_
 
 namespace microhal {
 namespace cli {
 
-template <typename Map>
-class EnumParser : public Argument {
- public:
-    using key_t = typename Map::key_t;
+enum class Status {
+    Success,
+    Error = 0x00,
+    UnrecognizedParameter,
+    MaxViolation = 0x01,      // argument value bigger than permitted (set biggest)
+    MinViolation = 0x02,      // argument value lesser than permitted (set smallest)
+    LengthViolation = 0x04,   // argument string do not suit given buffer (done nothing)
+    MissingArgument = 0x08,   // no argument given (returns default value)
+    IncorectArgument = 0x10,  // argument has wrong format (returns default value)
+    NoMnemonic = 0x20,        // no such mnemonic (returns default value)
+    OK = 0x40,                // returns appropriate value
+    HelpRequested,
 
-    constexpr EnumParser(Map &map, char shortCommand, string_view command, string_view help)
-        : Argument(shortCommand, command, "{...}", help), map(map) {}
+};
 
-    constexpr ~EnumParser() = default;
-
-    [[nodiscard]] constexpr Status parse(string_view str) final {
-        str = removeSpaces(str);
-        auto result = map.keyFor(str);
-        if (result.ec == std::errc()) {
-            m_key = result.key;
-            return Status::Success;
-        }
-        return Status::Error;
-    }
-
-    [[nodiscard]] string_view formatArgument(std::span<char> buffer) final {
-        buffer[0] = '[';
-        buffer[1] = '-';
-        char *ptr = &buffer[3];
-        if (shortCommand > 0) {
-            buffer[2] = shortCommand;
-        } else {
-            buffer[2] = '-';
-            ptr = std::copy_n(command.begin(), command.size(), &buffer[3]);
-        }
-
-        size_t spaceLeft = buffer.data() + buffer.size() - ptr;
-        if (spaceLeft < 3) return {buffer.data(), ptr};
-        *ptr++ = ' ';
-        *ptr++ = '{';
-        for (auto &x : map) {
-            if (spaceLeft < x.second.size() + 1) break;
-            ptr = std::copy_n(x.second.begin(), x.second.size(), ptr);
-            *ptr++ = ',';
-            spaceLeft -= x.second.size() + 1;
-        }
-        *(ptr - 1) = '}';
-        *ptr++ = ']';
-
-        return {buffer.data(), ptr};
-    }
-
-    [[nodiscard]] key_t key() const { return m_key; }
-
- private:
-    const Map map;
-    key_t m_key{};
-};  // namespace cli
+constexpr Status operator|(const Status lhs, const Status rhs) {
+    return static_cast<Status>(static_cast<int>(lhs) | static_cast<int>(rhs));
+}
 
 }  // namespace cli
 }  // namespace microhal
 
-#endif /* SRC_CLI_PARSERS_ENUMPARSER_H_ */
+#endif /* SRC_CLI_PARSERS_STATUS_H_ */

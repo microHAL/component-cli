@@ -30,21 +30,21 @@
 namespace microhal {
 namespace cli {
 
-IPMaskParser::ParserStatus IPMaskParser::parse(string_view str) {
+Status IPMaskParser::parse(string_view str) {
     // Parse string: 255.255.255.0
 
     str = removeSpaces(str);
     for (uint_fast8_t i = 0; i < 4; i++) {
         auto dotPos = str.find('.');
         auto number = str.substr(0, dotPos);
-        if (number.find(' ') != number.npos) return ParserStatus::Error;
+        if (number.find(' ') != number.npos) return Status::Error;
         auto [value, error] = fromStringView<uint8_t>(number);
-        if (error != ParserStatus::Success) return ParserStatus::Error;
+        if (error != Status::Success) return Status::Error;
         m_ip.ip[3 - i] = value;
         str.remove_prefix(dotPos + 1);
     }
 
-    return validateMask(m_ip) ? ParserStatus::Success : ParserStatus::Error;
+    return validateMask(m_ip) ? Status::Success : Status::Error;
 }
 
 bool IPMaskParser::validateMask(IP mask) {

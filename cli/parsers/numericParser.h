@@ -41,14 +41,16 @@ class NumericParser : public Argument {
     constexpr NumericParser(char shotCommand, string_view command, string_view name, string_view help, Type min, Type max, uint_fast8_t base = 10)
         : Argument(shotCommand, command, name, help), base(base), min(min), max(max) {}
 
-    [[nodiscard]] ParserStatus parse(string_view str) final {
+    [[nodiscard]] Status parse(string_view str) final {
         str = removeSpaces(str);
-        if (str.find(' ') != str.npos) return ParserStatus::Error;
+        if (str.size() == 0) return Status::MissingArgument;
+        // spaces in the middle of data are not allowed, return error
+        if (str.find(' ') != str.npos) return Status::IncorectArgument;
 
         auto [value, error] = fromStringView<Type>(str, base, min, max);
-        if (error != ParserStatus::Success) return ParserStatus::Error;
+        if (error != Status::Success) return error;
         parsedValue = value;
-        return ParserStatus::Success;
+        return Status::Success;
     }
 
     [[nodiscard]] Type value() const { return parsedValue; }

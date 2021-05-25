@@ -34,6 +34,7 @@
 #include <span>
 #include <string_view>
 #include "IODevice/IODevice.h"
+#include "status.h"
 
 namespace microhal {
 namespace cli {
@@ -44,9 +45,7 @@ class Argument {
 
     constexpr virtual ~Argument() = default;
 
-    enum class ParserStatus { Error, Success };
-
-    [[nodiscard]] constexpr virtual ParserStatus parse(string_view str) = 0;
+    [[nodiscard]] constexpr virtual Status parse(string_view str) = 0;
 
     [[nodiscard]] int_fast8_t correctCommand(string_view cmd);
     [[nodiscard]] virtual string_view formatArgument(std::span<char> buffer);
@@ -65,10 +64,15 @@ class Argument {
         auto [ptr, error] = std::from_chars(str.begin(), str.end(), result, base);
         struct OUT {
             Type value;
-            ParserStatus ec;
+            Status ec;
         };
-        if (result > max || result < min) error = std::errc::value_too_large;
-        return OUT{result, (error == std::errc()) ? ParserStatus::Success : ParserStatus::Error};
+        if (error == std::errc()) {
+            if (result > max) return OUT{{}, Status::MaxViolation};
+            if (result < min) return OUT{{}, Status::MinViolation};
+            return OUT{result, Status::Success};
+        }
+        if (error == std::errc::result_out_of_range) return OUT{{}, Status::MaxViolation | Status::MinViolation};
+        if (error == std::errc::invalid_argument) return OUT{{}, Status::IncorectArgument};
     }
 
     [[nodiscard]] constexpr static string_view removeSpaces(string_view str) {

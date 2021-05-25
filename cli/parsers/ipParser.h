@@ -39,7 +39,7 @@ class IPParser : public Argument {
  public:
     constexpr IPParser(string_view command, string_view name, string_view help) : Argument(-1, command, name, help) {}
 
-    [[nodiscard]] ParserStatus parse(string_view str) final;
+    [[nodiscard]] Status parse(string_view str) final;
 
     [[nodiscard]] std::optional<const IP> ip() const { return m_ip; }
 

@@ -31,6 +31,7 @@
 #include <string_view>
 #include <vector>
 #include "argument.h"
+#include "status.h"
 
 namespace microhal {
 namespace cli {
@@ -41,7 +42,7 @@ class ArgumentParser {
 
     void addArgument(Argument &arg) { arguments.push_back(&arg); }
 
-    void parse(std::string_view argumentsString, IODevice &ioDevice);
+    [[nodiscard]] Status parse(std::string_view argumentsString, IODevice &ioDevice);
 
     void showUsage(IODevice &ioDevice);
 
