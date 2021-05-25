@@ -114,10 +114,10 @@ std::string_view ArgumentParser::getParameters(std::string_view arguments, int8_
     // remove leading and trailing spaces
     arguments = removeSpaces(arguments);
 
-    auto argumentsBegin = 0;
+    size_t argumentsBegin = 0;
     do {
-        auto stringQuoteBeginPos = arguments.find('"');
-        auto stringQuoteEndPos = stringQuoteBeginPos != arguments.npos ? arguments.find('"', stringQuoteBeginPos) : arguments.npos;
+        const auto stringQuoteBeginPos = arguments.find('"');
+        const auto stringQuoteEndPos = stringQuoteBeginPos != arguments.npos ? arguments.find('"', stringQuoteBeginPos) : arguments.npos;
         auto parameterSeparator = arguments.find(' ', argumentsBegin);
         if (parameterSeparator == arguments.npos) parameterSeparator = arguments.size();
         if (stringQuoteBeginPos != arguments.npos) {

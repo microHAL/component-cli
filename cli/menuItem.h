@@ -94,7 +94,7 @@ class MenuItem {
      * @param port - a console stream.
      * @return Execution return value (for further implementation).
      */
-    virtual int execute(std::string_view parameters, IODevice& port) { return 0; }
+    virtual int execute([[maybe_unused]] std::string_view parameters, [[maybe_unused]] IODevice& port) { return 0; }
 
     /**
      * @brief	Function for recognition whether it has children list or not. For recognition between itself

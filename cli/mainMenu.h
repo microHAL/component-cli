@@ -51,8 +51,6 @@
 #include "string.h"
 #include "subMenu.h"
 
-#include <list>
-
 namespace microhal {
 class CLI;
 
@@ -72,7 +70,7 @@ class MainMenu : public SubMenu {
     /**
      * @brief List indicating current position in folder tree.
      */
-    std::list<SubMenu*> activeMenu;
+    std::list<SubMenu*> activeMenu{};
 
     /**
      * @brief Explores the tree of catalogs. Go into sub-folders, executes commands. Puts
@@ -96,10 +94,10 @@ class MainMenu : public SubMenu {
      * @param words - list of given words.
      * @param maxAppend - count of letters that could be added (without null termination).
      * @return  Returns:
-     *          - number of appended letters (if there was just one command conforming given name)
-     *          - -1 if there is no given sub-folder or there was more conforming items
+     *          - string_view with letters to appended (if there was just one command conforming given name)
+     *          - empty string_view if there is no given sub-folder or there was more conforming items
      */
-    int showCommands(std::list<char*>& words, int maxAppend);
+    std::string_view showCommands(std::string_view command);
 
  public:
     /**

@@ -44,6 +44,8 @@
 
 #include "CLI.h"
 
+using namespace std::literals;
+
 namespace microhal {
 
 void CLI::addSign(char sign) {
@@ -127,7 +129,7 @@ void CLI::showPreviousCommand() {
     }
     if (tmpPrev != activeBuffer) {
         /* If previous command exists */
-        if (dataBuffer[tmpPrev][0] != (char)0) {
+        if (dataBuffer[tmpPrev][0] != '\0') {
             cleanLine(length);  // Cleaning current line
             charAppend(0);
             /* Setting line from history, and printing its content */
@@ -157,10 +159,7 @@ void CLI::duplicateCommand() {
 
 void CLI::processBuffer() {
     if (length != 0) {
-        // add end of string sign
-        charAppend(0);
-
-        auto buf = std::string_view(dataBuffer[activeBuffer]);
+        auto buf = std::string_view(dataBuffer[activeBuffer], length);
         auto command = buf;
         std::string_view parameters{};
         if (auto pos = buf.find(' '); pos != buf.npos) {
@@ -168,14 +167,9 @@ void CLI::processBuffer() {
             parameters = buf.substr(pos + 1);
         }
         menu.processCommand(command, parameters);
-        /* Restoring the string after calling strtok, last null termination not included */
-        --length;  // because of added termination string
-        for (int pos = 0; pos < length; ++pos) {
-            if (!dataBuffer[activeBuffer][pos]) dataBuffer[activeBuffer][pos] = ' ';
-        }
         activeBuffer = (activeBuffer + 1) % BUFFERLENGTH;
         length = 0;
-        dataBuffer[activeBuffer][0] = (char)0;
+        dataBuffer[activeBuffer][0] = '\0';
         previousBuffer = activeBuffer;
     }
     drawPrompt();
@@ -184,7 +178,7 @@ void CLI::processBuffer() {
 void CLI::init() {
     // clear buffer
     for (uint32_t index = 0; index < BUFFERLENGTH; index++) {
-        dataBuffer[index][0] = (char)0;
+        dataBuffer[index][0] = '\0';
     }
 
     // draw prompt on screen
@@ -192,37 +186,33 @@ void CLI::init() {
 }
 
 void CLI::showCommands() {
-    // add end of string sign
-    charAppend(0);
-
-    std::list<char *> words;
-    char *word = strtok(dataBuffer[activeBuffer], " "); /* Word pointer */
-    while (NULL != word) {
-        if (word) words.push_back(word);
-        word = strtok(NULL, " ");
+    const auto buf = std::string_view(dataBuffer[activeBuffer], length);
+    auto command = buf;
+    std::string_view parameters{};
+    if (auto pos = buf.find(' '); pos != buf.npos) {
+        command = buf.substr(0, pos);
+        parameters = buf.substr(pos + 1);
     }
     /* Last word is containing the sentence that should be complemented */
-    int ret = menu.showCommands(words, LINELENGTH - length - 1);
-    --length;  // because of added termination string
-    if (ret > 0) {
+    std::string_view ret = menu.showCommands(command);
+    if (ret.size() > 0) {
         /* ret number of letters were appended */
-        /* Clearing current line */
-
-        cleanLine(length);
-        length += ret;
-        if (length >= LINELENGTH - 1) {
-            length = LINELENGTH - 1;
+        const uint16_t spaceInBuffer = LINELENGTH - length;
+        if (ret.size() < spaceInBuffer) {
+            ret.copy(&dataBuffer[activeBuffer][buf.size()], ret.size());
+            /* Clearing current line */
+            cleanLine(length);
+            length += ret.size();
+            dataBuffer[activeBuffer][length] = 0;
+        } else {
+            port.write("\n\rLine buffer overflow.\n\r"sv);
         }
     }
-    /* Restoring the string after calling strtok, last null termination not included */
-    for (int pos = 0; pos < length; ++pos) {
-        if (!dataBuffer[activeBuffer][pos]) dataBuffer[activeBuffer][pos] = ' ';
-    }
-    if (ret <= 0) {
+    if (ret.empty()) {
         /* Some text has been displayed, puts new prompt and rewrite command */
         drawPrompt();
     }
-    port.write(dataBuffer[activeBuffer]);
+    port.write({dataBuffer[activeBuffer], length});
 }
 
 }  // namespace microhal

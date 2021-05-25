@@ -43,10 +43,8 @@
  */
 
 #include "mainMenu.h"
-#include "IODevice/IODevice.h"
-
-#include <list>
 #include <string_view>
+#include "IODevice/IODevice.h"
 
 using namespace std::literals;
 
@@ -81,8 +79,7 @@ void MainMenu::processCommand(std::string_view command, std::string_view paramet
             return;
         }
         if ("ls"sv == command) {
-            std::list<char*> list;
-            showCommands(list, 0);
+            showCommands({});
             return;
         }
 
@@ -98,85 +95,56 @@ void MainMenu::processCommand(std::string_view command, std::string_view paramet
             }
         }
         if (commandFound == false) {
-            port.write("\n\r\tno such command...");
+            port.write("\n\r\tno such command..."sv);
             goBack(visitedFolders);
             return;
         }
     }
 }
 
-int MainMenu::showCommands(std::list<char*>& words, int maxAppend) {
+std::string_view MainMenu::showCommands(std::string_view command) {
     SubMenu* pSubMenu = activeMenu.back();
-    std::list<char*>::iterator itLastWord = words.end();
-    --itLastWord;
-
-    bool foundCommand = false;
-
     /* Just show commands */
-    if (words.empty()) {
+    if (command.empty()) {
         for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
-            port.write("\n\r\t");
+            port.write("\n\r\t"sv);
             port.write((*it)->name);
         }
-        return -1;
-    } else if (pSubMenu->hasChildrens() && (words.size() > 1)) {
-        /* Searching catalogs  */
-        for (auto word = words.begin(); word != itLastWord; ++word) {
-            /* Checking whether the element is SubMenu or MenuItem */
-            foundCommand = false;
-            for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
-                if ((*it)->name == *word) {
-                    foundCommand = true;
-                    pSubMenu = static_cast<SubMenu*>(*it);
-                    if (!pSubMenu->hasChildrens()) {
-                        port.write("\tit is a function, not a subfolder...");
-                        return -1;
-                    }
-                    break;
-                }
-            }
-            if (!foundCommand) {
-                port.write("\tno such subfolder...");
-                return -1;
-            }
-        }
+        return {};
     }
     /* Processing and appending letters, pSubMenu is the current subfolder */
     /* Counting how many candidates has the same prefix */
     int samePrefixCnt = 0;
-    int appendedChars;
     for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); it++) {
-        if ((*it)->name.starts_with(*itLastWord)) {
+        if ((*it)->name.starts_with(command)) {
             ++samePrefixCnt;
         }
     }
     /* Show candidates with the same prefix */
     for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
-        if ((*it)->name.starts_with(*itLastWord)) {
+        if ((*it)->name.starts_with(command)) {
             if (1 == samePrefixCnt) {
                 /* Append letters */
-                appendedChars = (*it)->name.size() - strlen(*itLastWord);
-                strncpy((*itLastWord), (*it)->name.data(), maxAppend);
-                return appendedChars;
+                return (*it)->name.substr(command.size());
             } else if (samePrefixCnt > 1) {
-                port.write("\n\r\t\t ");
+                port.write("\n\r\t\t "sv);
                 port.write((*it)->name);
             }
         }
     }
-    return -1;
+    return {};
 }
 
 void MainMenu::drawPrompt() {
-    port.write("\n\r");
+    port.write("\n\r"sv);
     std::list<SubMenu*>::iterator it = activeMenu.begin();
     ++it;
     for (; it != activeMenu.end(); ++it) {
-        port.write("> ");
+        port.write("> "sv);
         port.write((*it)->name);
-        port.write(" ");
+        port.write(" "sv);
     }
-    port.write("> ");
+    port.write("> "sv);
 }
 
 }  // namespace microhal
