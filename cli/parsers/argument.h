@@ -73,6 +73,7 @@ class Argument {
         }
         if (error == std::errc::result_out_of_range) return OUT{{}, Status::MaxViolation | Status::MinViolation};
         if (error == std::errc::invalid_argument) return OUT{{}, Status::IncorectArgument};
+        return OUT{{}, Status::Error};
     }
 
     [[nodiscard]] constexpr static string_view removeSpaces(string_view str) {

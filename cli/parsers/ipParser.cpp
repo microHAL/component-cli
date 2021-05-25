@@ -38,7 +38,7 @@ Status IPParser::parse(string_view str) {
     for (uint_fast8_t i = 0; i < 4; i++) {
         auto dotPos = str.find('.');
         auto number = str.substr(0, dotPos);
-        if (number.find(' ') != number.npos) return Status::Error;
+        if (number.find(' ') != number.npos) return Status::IncorectArgument;
         auto [value, error] = fromStringView<uint8_t>(number);
         if (error != Status::Success) return Status::IncorectArgument;
         m_ip.ip[3 - i] = value;
