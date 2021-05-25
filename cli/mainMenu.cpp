@@ -80,13 +80,6 @@ void MainMenu::processCommand(std::list<char*>& words) {
             if (activeMenu.size() > 1) activeMenu.pop_back();
             return;
         }
-        if (!strcmp("help", words.front())) {
-            /* There is a compare match, switching active menu */
-            port.write("\n");
-            port.write(activeSubMenu->help);
-            goBack(visitedFolders);
-            return;
-        }
         if ("ls"sv == std::string_view{words.front()}) {
             std::list<char*> list;
             showCommands(list, 0);
@@ -94,7 +87,7 @@ void MainMenu::processCommand(std::list<char*>& words) {
         }
 
         for (std::list<MenuItem*>::iterator it = activeSubMenu->items.begin(); it != activeSubMenu->items.end(); ++it) {
-            if (!strcmp((*it)->name, words.front())) {
+            if ((*it)->name == std::string_view{words.front()}) {
                 /* There is a compare match, switching active menu */
                 words.pop_front();
                 if ((*it)->hasChildrens()) {
@@ -127,7 +120,7 @@ int MainMenu::showCommands(std::list<char*>& words, int maxAppend) {
     /* Just show commands */
     if (words.empty()) {
         for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
-            port.write("\n\t");
+            port.write("\n\r\t");
             port.write((*it)->name);
         }
         return -1;
@@ -137,7 +130,7 @@ int MainMenu::showCommands(std::list<char*>& words, int maxAppend) {
             /* Checking whether the element is SubMenu or MenuItem */
             foundCommand = false;
             for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
-                if (!strcmp((*it)->name, (*word))) {
+                if ((*it)->name == *word) {
                     foundCommand = true;
                     pSubMenu = static_cast<SubMenu*>(*it);
                     if (!pSubMenu->hasChildrens()) {
@@ -158,20 +151,20 @@ int MainMenu::showCommands(std::list<char*>& words, int maxAppend) {
     int samePrefixCnt = 0;
     int appendedChars;
     for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); it++) {
-        if (!strncmp(*itLastWord, (*it)->name, strlen(*itLastWord))) {
+        if ((*it)->name.starts_with(*itLastWord)) {
             ++samePrefixCnt;
         }
     }
     /* Show candidates with the same prefix */
     for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
-        if (!strncmp(*itLastWord, (*it)->name, strlen(*itLastWord))) {
+        if ((*it)->name.starts_with(*itLastWord)) {
             if (1 == samePrefixCnt) {
                 /* Append letters */
-                appendedChars = strlen((*it)->name) - strlen(*itLastWord);
-                strncpy((*itLastWord), (*it)->name, maxAppend);
+                appendedChars = (*it)->name.size() - strlen(*itLastWord);
+                strncpy((*itLastWord), (*it)->name.data(), maxAppend);
                 return appendedChars;
             } else if (samePrefixCnt > 1) {
-                port.write("\n\t\t ");
+                port.write("\n\r\t\t ");
                 port.write((*it)->name);
             }
         }

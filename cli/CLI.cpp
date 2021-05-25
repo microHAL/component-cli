@@ -88,8 +88,10 @@ void CLI::addSign(char sign) {
             showCommands();
             return;
             break;
+
         case '\r':
             previous_CR = 1;
+        case '\n':
             if (previousBuffer != activeBuffer) duplicateCommand();
             processBuffer();
             return;
@@ -111,8 +113,8 @@ void CLI::addSign(char sign) {
 
     if (length < maxLen) {
         if (previousBuffer != activeBuffer) duplicateCommand();
-        charAppend(sign);
-        // if (sign == charAppend(sign)) port.write(&sign, 1);
+        // charAppend(sign);
+        if (sign == charAppend(sign)) port.write(&sign, 1);
     }
 }
 

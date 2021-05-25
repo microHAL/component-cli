@@ -106,14 +106,7 @@ class MainMenu : public SubMenu {
      * @brief Creates a menu.
      * @param port - IODevice console port.
      */
-    MainMenu(IODevice& port) : SubMenu((const char*)0, (const char*)0), port(port) { activeMenu.push_back(this); }
-
-    /**
-     * @brief Creates a menu.
-     * @param port - IODevice console port.
-     * @param helpText - default help text.
-     */
-    MainMenu(IODevice& port, const char* helpText) : SubMenu((char*)0, helpText), port(port) { activeMenu.push_back(this); }
+    MainMenu(IODevice& port) : SubMenu({}), port(port) { activeMenu.push_back(this); }
 };
 
 }  // namespace microhal

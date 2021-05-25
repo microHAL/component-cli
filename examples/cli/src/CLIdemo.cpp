@@ -67,11 +67,11 @@ using namespace microhal;
 
 class MemorySave : public MenuItem {
  public:
-    MemorySave(void) : MenuItem("save", "Saves current state to non-volatile memory.") {}
+    MemorySave(void) : MenuItem("save") {}
     static void memorySave(IODevice& port) { port.write("Memory saved!!!"); }
 
  protected:
-    int execute(std::list<char*>& words, IODevice& port) {
+    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) {
         memorySave(port);
         return 0;
     }
@@ -79,11 +79,11 @@ class MemorySave : public MenuItem {
 
 class MemoryRestore : public MenuItem {
  public:
-    MemoryRestore(void) : MenuItem("restore", "Restores saved device state.") {}
+    MemoryRestore(void) : MenuItem("restore") {}
     static void memoryRestore(IODevice& port) { port.write("Memory restored!!!"); }
 
  protected:
-    virtual int execute(std::list<char*>& words, IODevice& port) {
+    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
         memoryRestore(port);
         return 0;
     }
@@ -95,7 +95,7 @@ class Car : public MenuItem {
     static float maxSpeed;
     static int gearsCnt;
 
-    Car(const char* name, const char* help) : MenuItem(name, help) {}
+    Car(std::string_view name) : MenuItem(name) {}
 
  protected:
     void setColor(std::string_view color) {
@@ -110,19 +110,10 @@ int Car::gearsCnt = -1;
 
 class CarSet : public Car {
  public:
-    CarSet(void)
-        : Car("set",
-              "Set car parameters:"
-              "\n\tcolor:\t<"
-              "red"
-              ", "
-              "yellow"
-              ", etc...> - color name as string"
-              "\n\tspeed:\t<max speed> - max speed of car"
-              "\n\tgears:\t<gears count> - gears count") {}
+    CarSet(void) : Car("set") {}
 
  protected:
-    virtual int execute(std::list<char*>& words, IODevice& port) {
+    int execute(std::list<char*>& words, IODevice& port) final {
         std::string str;
         for (auto& word : words) {
             str += word;
@@ -159,10 +150,10 @@ class CarSet : public Car {
 
 class CarPrint : public Car {
  public:
-    CarPrint(void) : Car("get", "Get car parameters.") {}
+    CarPrint(void) : Car("get") {}
 
  protected:
-    virtual int execute(std::list<char*>& words, IODevice& port) {
+    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
         char txt[30];
         port.write("Your car is ");
         port.write(color);
@@ -175,7 +166,7 @@ class CarPrint : public Car {
 
 class Clock : public MenuItem {
  public:
-    Clock(const char* name, const char* help) : MenuItem(name, help) {}
+    Clock(std::string_view name) : MenuItem(name) {}
 
     static int hours, minutes, seconds;
     static bool alarm;
@@ -188,14 +179,14 @@ bool Clock::alarm = false;
 
 class AlarmOff : public Clock {
  public:
-    AlarmOff(void) : Clock("off", "Restores saved device state.") {}
+    AlarmOff(void) : Clock("off") {}
     static void alarmOff(IODevice& port) {
         alarm = false;
         port.write("AlarmOff");
     }
 
  protected:
-    virtual int execute(std::list<char*>& words, IODevice& port) {
+    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
         alarmOff(port);
         return 0;
     }
@@ -203,14 +194,14 @@ class AlarmOff : public Clock {
 
 class AlarmOn : public Clock {
  public:
-    AlarmOn(void) : Clock("on", "Restores saved device state.") {}
+    AlarmOn(void) : Clock("on") {}
     static void alarmOn(IODevice& port) {
         alarm = true;
         port.write("AlarmOn");
     }
 
  protected:
-    virtual int execute(std::list<char*>& words, IODevice& port) {
+    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
         alarmOn(port);
         return 0;
     }
@@ -218,7 +209,7 @@ class AlarmOn : public Clock {
 
 class ClockStatus : public Clock {
  public:
-    ClockStatus(void) : Clock("status", "Gives current time.") {}
+    ClockStatus(void) : Clock("status") {}
     static void clockStatus(IODevice& port) {
         char str[25];
         snprintf(str, 25, "%02d:%02d:%02d\n", hours, minutes, seconds);
@@ -230,7 +221,7 @@ class ClockStatus : public Clock {
     }
 
  protected:
-    virtual int execute(std::list<char*>& words, IODevice& port) {
+    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
         clockStatus(port);
         return 0;
     }
@@ -238,10 +229,10 @@ class ClockStatus : public Clock {
 
 class ClockSet : public Clock {
  public:
-    ClockSet(void) : Clock("set", "Sets current time\n\t-h: <hours>\n\t-m: <minutes>\n\t-s:[seconds]") {}
+    ClockSet(void) : Clock("set") {}
 
  protected:
-    virtual int execute(std::list<char*>& words, IODevice& port) {
+    int execute(std::list<char*>& words, IODevice& port) final {
         std::string str;
         for (auto& word : words) {
             str += word;
@@ -277,12 +268,12 @@ class ClockSet : public Clock {
 int main(void) {
     debugPort.open(IODevice::ReadWrite);
 
-    MainMenu _root(debugPort, "CLI example application.");
+    MainMenu _root(debugPort);
 
-    SubMenu _clock("clock", "System clock management.");
+    SubMenu _clock("clock");
     _root.addItem(_clock);
 
-    SubMenu _car("car", "Set and check your car.");
+    SubMenu _car("car");
     _root.addItem(_car);
     CarPrint carPrint;
     CarSet carSet;
@@ -293,12 +284,12 @@ int main(void) {
     _clock.addItem(cstat);
     ClockSet cset;
     _clock.addItem(cset);
-    SubMenu _alarm("alarm", "Configure alarm.");
+    SubMenu _alarm("alarm");
     _clock.addItem(_alarm);
 
-    SubMenu _emptySet("empty", "Just an empty set");
+    SubMenu _emptySet("empty");
     _root.addItem(_emptySet);
-    SubMenu _recursiveEmptySet("empty", "Recursive emtpy set");
+    SubMenu _recursiveEmptySet("empty");
     _emptySet.addItem(_recursiveEmptySet);
 
     AlarmOn aon;
@@ -306,7 +297,7 @@ int main(void) {
     AlarmOff aoff;
     _alarm.addItem(aoff);
 
-    SubMenu _memory("memory", "Store and read settings configuration.");
+    SubMenu _memory("memory");
     _root.addItem(_memory);
 
     MemorySave ms;

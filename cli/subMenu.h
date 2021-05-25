@@ -64,7 +64,7 @@ class SubMenu : public MenuItem {
      * @param name - sub folder name.
      * @param help - default help description.
      */
-    SubMenu(const char* name, const char* help) : MenuItem(name, help) {}
+    SubMenu(std::string_view name) : MenuItem(name) {}
 
     /**
      * @brief Adds an MenuItem into sub folder.

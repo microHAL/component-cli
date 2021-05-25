@@ -28,7 +28,7 @@
  */
 
 /**
- * @defgroup microHAL
+ * @defgroup microhal
  * @{
  */
 
@@ -45,8 +45,9 @@
 #ifndef _CLI_MENUITEM_H_
 #define _CLI_MENUITEM_H_
 
-#include "IODevice/IODevice.h"
 #include <list>
+#include <string_view>
+#include "IODevice/IODevice.h"
 
 namespace microhal {
 
@@ -59,78 +60,55 @@ class CLI;
  */
 
 class MenuItem {
-
-  friend MainMenu;
-  friend SubMenu;
-  friend CLI;
+    friend MainMenu;
+    friend SubMenu;
+    friend CLI;
 
  public:
-  /**
-   * @brief Constructs MenuItem instance.
-   * @param name - name of MenuItem object visible in CLI.
-   * @param help - default help string.
-   */
-  MenuItem(const char *name, const char *help)
-      : name(name),
-        help(help) {
-  }
+    /**
+     * @brief Constructs MenuItem instance.
+     * @param name - name of MenuItem object visible in CLI.
+     * @param help - default help string.
+     */
+    MenuItem(std::string_view name) : name(name) {}
+    virtual ~MenuItem() = default;
 
-  /**
-   * @brief Wrapper for executing commands. Checks whether the invocation contains default
-   *        command help before the function will be called.
-   * @param words
-   * @param port
-   */
-  void command(std::list<char*>& words, IODevice& port) {
-    port.write("\n");
-    if (words.size() > 0) {
-      if (!strcmp("help", words.front())) {
-        // Compare math, displaying help message.
-        port.write(help);
-        return;
-      }
+    /**
+     * @brief Wrapper for executing commands. Checks whether the invocation contains default
+     *        command help before the function will be called.
+     * @param words
+     * @param port
+     */
+    void command(std::list<char*>& words, IODevice& port) {
+        port.write("\n\r");
+        execute(words, port);
     }
-    execute(words, port);
-  }
 
-  /**
-   * @brief Executes command.
-   * @param words - list of command arguments.
-   * @param port - a console stream.
-   * @return Execution return value (for further implementation).
-   */
-  virtual int execute(std::list<char*>& words, IODevice& port) {
-    return 0;
-  }
+    /**
+     * @brief Executes command.
+     * @param words - list of command arguments.
+     * @param port - a console stream.
+     * @return Execution return value (for further implementation).
+     */
+    virtual int execute(std::list<char*>& words, IODevice& port) { return 0; }
 
-  /**
-   * @brief	Function for recognition whether it has children list or not. For recognition between itself
-   * 		or inheriting class.
-   * @return	False.
-   */
-  virtual inline bool hasChildrens(void){
-	  return false;
-  }
+    /**
+     * @brief	Function for recognition whether it has children list or not. For recognition between itself
+     * 		or inheriting class.
+     * @return	False.
+     */
+    virtual inline bool hasChildrens(void) { return false; }
 
  protected:
-  /**
-   * @brief CLI object name.
-   */
-  const char *name;
-  /**
-   * @brief Command default help information.
-   */
-  const char *help;
-}; // class MenuItem
+    /**
+     * @brief CLI object name.
+     */
+    const std::string_view name;
+};
 
-} // namespace microhal
+}  // namespace microhal
 
-#endif // _CLI_MENUITEM_H_
-
-/**
- * example
- * @}
- */
+#endif  // _CLI_MENUITEM_H_
 
 /**
  * cli
@@ -142,3 +120,7 @@ class MenuItem {
  * @}
  */
 
+/**
+ * microhal
+ * @}
+ */
