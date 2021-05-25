@@ -35,10 +35,9 @@ namespace cli {
 
 Status ArgumentParser::parse(std::string_view argumentsString, IODevice &ioDevice) {
     // remove leading and trailing spaces
-    argumentsString.remove_prefix(argumentsString.find_first_not_of(' '));
-    if (auto pos = argumentsString.find_last_not_of(' '); pos != argumentsString.npos)
-        argumentsString.remove_suffix(argumentsString.size() - pos - 1);
+    argumentsString = removeSpaces(argumentsString);
 
+    if (argumentsString.size() == 0 && arguments.size() != 0) return Status::NoArguments;
     // decode all parameters
     do {
         const auto pos = argumentsString.find('-');
@@ -106,16 +105,14 @@ void ArgumentParser::showUsage(IODevice &ioDevice) {
 
 bool ArgumentParser::isHelpArgument(std::string_view argument) {
     // remove leading and trailing spaces
-    argument.remove_prefix(argument.find_first_not_of(' '));
-    if (auto pos = argument.find_last_not_of(' '); pos != argument.npos) argument.remove_suffix(argument.size() - pos - 1);
+    argument = removeSpaces(argument);
 
     return argument == "-h"sv || argument == "--help"sv;
 }
 
 std::string_view ArgumentParser::getParameters(std::string_view arguments, int8_t argumentsCount) {
     // remove leading and trailing spaces
-    arguments.remove_prefix(arguments.find_first_not_of(' '));
-    if (auto pos = arguments.find_last_not_of(' '); pos != arguments.npos) arguments.remove_suffix(arguments.size() - pos - 1);
+    arguments = removeSpaces(arguments);
 
     auto argumentsBegin = 0;
     do {

@@ -38,7 +38,9 @@ namespace cli {
 
 class ArgumentParser {
  public:
-    ArgumentParser(std::string_view name, std::string_view description) : name(name), description(description) {}
+    using string_view = std::string_view;
+
+    ArgumentParser(string_view name, string_view description) : name(name), description(description) {}
 
     void addArgument(Argument &arg) { arguments.push_back(&arg); }
 
@@ -53,6 +55,14 @@ class ArgumentParser {
     std::vector<Argument *> arguments{};
     std::string_view name;
     std::string_view description;
+
+    [[nodiscard]] constexpr static string_view removeSpaces(string_view str) {
+        // remove leading spaces
+        if (auto pos = str.find_first_not_of(' '); pos != str.npos) str.remove_prefix(pos);
+        // remove trailing spaces
+        if (auto pos = str.find_last_not_of(' '); pos != str.npos) str.remove_suffix(str.size() - pos - 1);
+        return str;
+    }
 };
 
 }  // namespace cli
