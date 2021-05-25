@@ -62,7 +62,7 @@ void MainMenu::goBack(int count) {
 
 void MainMenu::processCommand(std::string_view command, std::string_view parameters) {
     int visitedFolders = 0;
-    SubMenu* activeSubMenu;  // active SubMenu
+    SubMenu* activeSubMenu;
 
     if (command.size()) {
         /* Searching the tree, getting words from string */
@@ -86,25 +86,21 @@ void MainMenu::processCommand(std::string_view command, std::string_view paramet
             return;
         }
 
-        for (std::list<MenuItem*>::iterator it = activeSubMenu->items.begin(); it != activeSubMenu->items.end(); ++it) {
-            if ((*it)->name == command) {
-                /* There is a compare match, switching active menu */
+        bool commandFound = false;
+        for (auto it = activeSubMenu->items.begin(); it != activeSubMenu->items.end(); ++it) {
+            if ((*it)->command(command, parameters, port)) {
                 if ((*it)->hasChildrens()) {
                     ++visitedFolders;
                     activeMenu.push_back(static_cast<SubMenu*>(*it));
-                } else {
-                    (*it)->command(parameters, port);
-                    goBack(visitedFolders);  // after visiting menu going to last visited folder
-                    return;
                 }
+                commandFound = true;
                 break;
             }
-
-            if (it == (--(std::list<MenuItem*>::iterator)activeSubMenu->items.end())) {
-                port.write("\tno such command...");
-                goBack(visitedFolders);
-                return;
-            }
+        }
+        if (commandFound == false) {
+            port.write("\n\r\tno such command...");
+            goBack(visitedFolders);
+            return;
         }
     }
 }

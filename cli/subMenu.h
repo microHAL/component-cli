@@ -89,7 +89,7 @@ class SubMenu : public MenuItem {
     /**
      * @brief List of object in sub folder.
      */
-    std::list<MenuItem*> items;
+    std::list<MenuItem*> items{};
 };
 
 }  // namespace microhal

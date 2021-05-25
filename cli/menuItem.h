@@ -79,9 +79,13 @@ class MenuItem {
      * @param words
      * @param port
      */
-    void command(std::string_view parameters, IODevice& port) {
-        port.write("\n\r");
-        execute(parameters, port);
+    bool command(std::string_view command, std::string_view parameters, IODevice& port) {
+        if (command == name) {
+            port.write("\n\r");
+            execute(parameters, port);
+            return true;
+        }
+        return false;
     }
 
     /**
