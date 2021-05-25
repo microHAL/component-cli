@@ -45,7 +45,7 @@
 #ifndef _CLI_MENUITEM_H_
 #define _CLI_MENUITEM_H_
 
-#include <list>
+#include <span>
 #include <string_view>
 #include "IODevice/IODevice.h"
 
@@ -79,7 +79,7 @@ class MenuItem {
      * @param words
      * @param port
      */
-    void command(std::list<char*>& words, IODevice& port) {
+    void command(std::span<std::string_view> words, IODevice& port) {
         port.write("\n\r");
         execute(words, port);
     }
@@ -90,7 +90,7 @@ class MenuItem {
      * @param port - a console stream.
      * @return Execution return value (for further implementation).
      */
-    virtual int execute(std::list<char*>& words, IODevice& port) { return 0; }
+    virtual int execute(std::span<std::string_view> words, IODevice& port) { return 0; }
 
     /**
      * @brief	Function for recognition whether it has children list or not. For recognition between itself

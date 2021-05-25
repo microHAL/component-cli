@@ -83,7 +83,7 @@ class MemoryRestore : public MenuItem {
     static void memoryRestore(IODevice& port) { port.write("Memory restored!!!"); }
 
  protected:
-    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
+    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
         memoryRestore(port);
         return 0;
     }
@@ -113,7 +113,7 @@ class CarSet : public Car {
     CarSet(void) : Car("set") {}
 
  protected:
-    int execute(std::list<char*>& words, IODevice& port) final {
+    int execute(std::span<std::string_view> words, IODevice& port) final {
         std::string str;
         for (auto& word : words) {
             str += word;
@@ -153,7 +153,7 @@ class CarPrint : public Car {
     CarPrint(void) : Car("get") {}
 
  protected:
-    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
+    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
         char txt[30];
         port.write("Your car is ");
         port.write(color);
@@ -186,7 +186,7 @@ class AlarmOff : public Clock {
     }
 
  protected:
-    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
+    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
         alarmOff(port);
         return 0;
     }
@@ -201,7 +201,7 @@ class AlarmOn : public Clock {
     }
 
  protected:
-    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
+    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
         alarmOn(port);
         return 0;
     }
@@ -221,7 +221,7 @@ class ClockStatus : public Clock {
     }
 
  protected:
-    int execute([[maybe_unused]] std::list<char*>& words, IODevice& port) final {
+    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
         clockStatus(port);
         return 0;
     }
@@ -232,7 +232,7 @@ class ClockSet : public Clock {
     ClockSet(void) : Clock("set") {}
 
  protected:
-    int execute(std::list<char*>& words, IODevice& port) final {
+    int execute(std::span<std::string_view> words, IODevice& port) final {
         std::string str;
         for (auto& word : words) {
             str += word;

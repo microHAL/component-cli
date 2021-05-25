@@ -60,7 +60,7 @@ void MainMenu::goBack(int count) {
     }
 }
 
-void MainMenu::processCommand(std::list<char*>& words) {
+void MainMenu::processCommand(std::span<std::string_view> words) {
     int visitedFolders = 0;
     SubMenu* activeSubMenu;  // active SubMenu
 
@@ -69,27 +69,27 @@ void MainMenu::processCommand(std::list<char*>& words) {
         activeSubMenu = activeMenu.back();
         /* SubMenu branches searching */
 
-        if (!strcmp("exit", words.front())) {
+        if ("exit"sv == words.front()) {
             /* Returning to root folder */
             while (activeMenu.size() > 1)
                 activeMenu.pop_back();
             return;
         }
-        if (!strcmp("..", words.front())) {
+        if (".."sv == words.front()) {
             /* Switching menu */
             if (activeMenu.size() > 1) activeMenu.pop_back();
             return;
         }
-        if ("ls"sv == std::string_view{words.front()}) {
+        if ("ls"sv == words.front()) {
             std::list<char*> list;
             showCommands(list, 0);
             return;
         }
 
         for (std::list<MenuItem*>::iterator it = activeSubMenu->items.begin(); it != activeSubMenu->items.end(); ++it) {
-            if ((*it)->name == std::string_view{words.front()}) {
+            if ((*it)->name == words.front()) {
                 /* There is a compare match, switching active menu */
-                words.pop_front();
+                words = words.subspan(1);
                 if ((*it)->hasChildrens()) {
                     ++visitedFolders;
                     activeMenu.push_back(static_cast<SubMenu*>(*it));
