@@ -48,7 +48,6 @@
  */
 
 #include "CLI.h"
-#include "cliParser.h"
 #include "microhal.h"
 #include "microhal_bsp.h"
 #include "parsers/argumentParser.h"
