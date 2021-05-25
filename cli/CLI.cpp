@@ -160,19 +160,14 @@ void CLI::processBuffer() {
         // add end of string sign
         charAppend(0);
 
-        std::vector<std::string_view> words;
         auto buf = std::string_view(dataBuffer[activeBuffer]);
-        while (1) {
-            if (auto pos = buf.find(' '); pos != buf.npos) {
-                words.push_back(buf.substr(0, pos));
-                buf.remove_prefix(pos + 1);
-            } else {
-                words.push_back(buf);
-                break;
-            }
-            if (buf.size() == 0) break;
+        auto command = buf;
+        std::string_view parameters{};
+        if (auto pos = buf.find(' '); pos != buf.npos) {
+            command = buf.substr(0, pos);
+            parameters = buf.substr(pos + 1);
         }
-        menu.processCommand(words);
+        menu.processCommand(command, parameters);
         /* Restoring the string after calling strtok, last null termination not included */
         --length;  // because of added termination string
         for (int pos = 0; pos < length; ++pos) {

@@ -83,7 +83,7 @@ class MemoryRestore : public MenuItem {
     static void memoryRestore(IODevice& port) { port.write("Memory restored!!!"); }
 
  protected:
-    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
+    int execute([[maybe_unused]] std::string_view parameters, IODevice& port) final {
         memoryRestore(port);
         return 0;
     }
@@ -113,12 +113,7 @@ class CarSet : public Car {
     CarSet(void) : Car("set") {}
 
  protected:
-    int execute(std::span<std::string_view> words, IODevice& port) final {
-        std::string str;
-        for (auto& word : words) {
-            str += word;
-            str += " ";
-        }
+    int execute(std::string_view parameters, IODevice& port) final {
         cli::StringParser color(-1, "color", "color", "color name as string", 1, 40);
         cli::NumericParser<float> speed(-1, "speed", "speed", "max speed of car", 50.0f, 400.0f);
         cli::NumericParser<int> gears(-1, "gears", "gears", "gears count", 3, 20);
@@ -126,7 +121,7 @@ class CarSet : public Car {
         parser.addArgument(color);
         parser.addArgument(speed);
         parser.addArgument(gears);
-        if (auto status = parser.parse(str, port); status == cli::Status::Success) {
+        if (auto status = parser.parse(parameters, port); status == cli::Status::Success) {
             port.write("\tSet color to ");
             port.write(color.value());
             port.write(".\n");
@@ -153,7 +148,7 @@ class CarPrint : public Car {
     CarPrint(void) : Car("get") {}
 
  protected:
-    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
+    int execute([[maybe_unused]] std::string_view parameters, IODevice& port) final {
         char txt[30];
         port.write("Your car is ");
         port.write(color);
@@ -186,7 +181,7 @@ class AlarmOff : public Clock {
     }
 
  protected:
-    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
+    int execute([[maybe_unused]] std::string_view parameters, IODevice& port) final {
         alarmOff(port);
         return 0;
     }
@@ -201,7 +196,7 @@ class AlarmOn : public Clock {
     }
 
  protected:
-    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
+    int execute([[maybe_unused]] std::string_view parameters, IODevice& port) final {
         alarmOn(port);
         return 0;
     }
@@ -221,7 +216,7 @@ class ClockStatus : public Clock {
     }
 
  protected:
-    int execute([[maybe_unused]] std::span<std::string_view> words, IODevice& port) final {
+    int execute([[maybe_unused]] std::string_view parameters, IODevice& port) final {
         clockStatus(port);
         return 0;
     }
@@ -232,12 +227,7 @@ class ClockSet : public Clock {
     ClockSet(void) : Clock("set") {}
 
  protected:
-    int execute(std::span<std::string_view> words, IODevice& port) final {
-        std::string str;
-        for (auto& word : words) {
-            str += word;
-            str += " ";
-        }
+    int execute(std::string_view parameters, IODevice& port) final {
         cli::NumericParser<int> sec('s', {}, "seconds", "Seconds from 0 to 59.", 0, 59);
         cli::NumericParser<int> min('m', {}, "minutes", "Minutes from 0 to 59.", 0, 59);
         cli::NumericParser<int> hrs(-1, "hr", "hours", "Hours from 0 to 23.", 0, 23);
@@ -245,7 +235,7 @@ class ClockSet : public Clock {
         parser.addArgument(sec);
         parser.addArgument(min);
         parser.addArgument(hrs);
-        if (parser.parse(str, port) == cli::Status::Success) {
+        if (parser.parse(parameters, port) == cli::Status::Success) {
             seconds = sec.value();
             minutes = min.value();
             hours = hrs.value();

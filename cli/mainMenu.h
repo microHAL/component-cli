@@ -79,7 +79,7 @@ class MainMenu : public SubMenu {
      *        text on screen as a result of its work.
      * @param words - list of words to process (order matters of course).
      */
-    void processCommand(std::span<std::string_view> words);
+    void processCommand(std::string_view command, std::string_view parameters);
 
     /**
      * @brief Goes count steps back to root folder. Safe.

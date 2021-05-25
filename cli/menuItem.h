@@ -79,9 +79,9 @@ class MenuItem {
      * @param words
      * @param port
      */
-    void command(std::span<std::string_view> words, IODevice& port) {
+    void command(std::string_view parameters, IODevice& port) {
         port.write("\n\r");
-        execute(words, port);
+        execute(parameters, port);
     }
 
     /**
@@ -90,7 +90,7 @@ class MenuItem {
      * @param port - a console stream.
      * @return Execution return value (for further implementation).
      */
-    virtual int execute(std::span<std::string_view> words, IODevice& port) { return 0; }
+    virtual int execute(std::string_view parameters, IODevice& port) { return 0; }
 
     /**
      * @brief	Function for recognition whether it has children list or not. For recognition between itself
