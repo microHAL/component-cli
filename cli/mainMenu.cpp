@@ -106,7 +106,7 @@ std::string_view MainMenu::showCommands(std::string_view command) {
     SubMenu* pSubMenu = activeMenu.back();
     /* Just show commands */
     if (command.empty()) {
-        for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
+        for (auto it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
             port.write("\n\r\t"sv);
             port.write((*it)->name);
         }
@@ -115,13 +115,13 @@ std::string_view MainMenu::showCommands(std::string_view command) {
     /* Processing and appending letters, pSubMenu is the current subfolder */
     /* Counting how many candidates has the same prefix */
     int samePrefixCnt = 0;
-    for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); it++) {
+    for (auto it = pSubMenu->items.begin(); it != pSubMenu->items.end(); it++) {
         if ((*it)->name.starts_with(command)) {
             ++samePrefixCnt;
         }
     }
     /* Show candidates with the same prefix */
-    for (std::list<MenuItem*>::iterator it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
+    for (auto it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
         if ((*it)->name.starts_with(command)) {
             if (1 == samePrefixCnt) {
                 /* Append letters */
@@ -137,7 +137,7 @@ std::string_view MainMenu::showCommands(std::string_view command) {
 
 void MainMenu::drawPrompt() {
     port.write("\n\r"sv);
-    std::list<SubMenu*>::iterator it = activeMenu.begin();
+    auto it = activeMenu.begin();
     ++it;
     for (; it != activeMenu.end(); ++it) {
         port.write("> "sv);

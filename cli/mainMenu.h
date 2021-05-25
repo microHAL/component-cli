@@ -46,9 +46,8 @@
 #define MAINMENU_H_
 
 #include <cstdint>
+#include <vector>
 #include "menuItem.h"
-#include "serialPort.h"
-#include "string.h"
 #include "subMenu.h"
 
 namespace microhal {
@@ -70,7 +69,7 @@ class MainMenu : public SubMenu {
     /**
      * @brief List indicating current position in folder tree.
      */
-    std::list<SubMenu*> activeMenu{};
+    std::vector<SubMenu*> activeMenu{};
 
     /**
      * @brief Explores the tree of catalogs. Go into sub-folders, executes commands. Puts
@@ -104,7 +103,7 @@ class MainMenu : public SubMenu {
      * @brief Creates a menu.
      * @param port - IODevice console port.
      */
-    MainMenu(IODevice& port) : SubMenu({}), port(port) { activeMenu.push_back(this); }
+    MainMenu(IODevice& port) : SubMenu({}), port(port), activeMenu({this}) {}
 };
 
 }  // namespace microhal

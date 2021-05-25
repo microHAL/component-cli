@@ -45,7 +45,7 @@
 #ifndef _CLI_SUBMENU_H_
 #define _CLI_SUBMENU_H_
 
-#include <list>
+#include <vector>
 #include "IODevice/IODevice.h"
 #include "menuItem.h"
 
@@ -87,9 +87,9 @@ class SubMenu : public MenuItem {
 
  private:
     /**
-     * @brief List of object in sub folder.
+     * @brief Vector of object in sub folder.
      */
-    std::list<MenuItem*> items{};
+    std::vector<MenuItem*> items{};
 };
 
 }  // namespace microhal

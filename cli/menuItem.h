@@ -45,7 +45,6 @@
 #ifndef _CLI_MENUITEM_H_
 #define _CLI_MENUITEM_H_
 
-#include <span>
 #include <string_view>
 #include "IODevice/IODevice.h"
 
@@ -68,7 +67,6 @@ class MenuItem {
     /**
      * @brief Constructs MenuItem instance.
      * @param name - name of MenuItem object visible in CLI.
-     * @param help - default help string.
      */
     MenuItem(std::string_view name) : name(name) {}
     virtual ~MenuItem() = default;
@@ -76,7 +74,7 @@ class MenuItem {
     /**
      * @brief Wrapper for executing commands. Checks whether the invocation contains default
      *        command help before the function will be called.
-     * @param words
+     * @param command
      * @param port
      */
     bool command(std::string_view command, std::string_view parameters, IODevice& port) {
@@ -90,7 +88,7 @@ class MenuItem {
 
     /**
      * @brief Executes command.
-     * @param words - list of command arguments.
+     * @param parameters - test string with command arguments.
      * @param port - a console stream.
      * @return Execution return value (for further implementation).
      */
