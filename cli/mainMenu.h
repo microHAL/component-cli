@@ -45,8 +45,8 @@
 #ifndef MAINMENU_H_
 #define MAINMENU_H_
 
+#include <array>
 #include <cstdint>
-#include <vector>
 #include "menuItem.h"
 #include "subMenu.h"
 
@@ -57,8 +57,8 @@ class CLI;
  * @brief Processes the text given by CLI. Implemented functions for moving through the
  *        menu tree, executing commands, command completion, and others.
  */
-class MainMenu : public SubMenu {
-    friend SubMenu;
+
+class MainMenuBase {
     friend CLI;
 
  private:
@@ -69,7 +69,7 @@ class MainMenu : public SubMenu {
     /**
      * @brief List indicating current position in folder tree.
      */
-    std::vector<SubMenu*> activeMenu{};
+    std::vector<SubMenuBase*> activeMenu{};
 
     /**
      * @brief Explores the tree of catalogs. Go into sub-folders, executes commands. Puts
@@ -103,7 +103,16 @@ class MainMenu : public SubMenu {
      * @brief Creates a menu.
      * @param port - IODevice console port.
      */
-    MainMenu(IODevice& port) : SubMenu({}), port(port), activeMenu({this}) {}
+    MainMenuBase(IODevice& port, SubMenuBase& base) : port(port), activeMenu({&base}) {}
+};
+
+template <size_t size>
+class MainMenu : public MainMenuBase {
+ public:
+    template <typename... Args>
+    MainMenu(IODevice& port, Args&... args) : MainMenuBase(port, submenu), submenu({}, args...) {}
+
+    SubMenu<size> submenu;
 };
 
 }  // namespace microhal

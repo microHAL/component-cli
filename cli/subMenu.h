@@ -45,38 +45,27 @@
 #ifndef _CLI_SUBMENU_H_
 #define _CLI_SUBMENU_H_
 
+#include <span>
 #include <vector>
 #include "IODevice/IODevice.h"
 #include "menuItem.h"
 
 namespace microhal {
 
-class MainMenu;
+class MainMenuBase;
 /**
  * @brief Provides sub-folder functionalities.
  */
-class SubMenu : public MenuItem {
-    friend MainMenu;
+class SubMenuBase : public MenuItem {
+    friend MainMenuBase;
 
- public:
+ protected:
     /**
      * @brief Constructs sub folder of given name and default help description.
      * @param name - sub folder name.
      * @param help - default help description.
      */
-    SubMenu(std::string_view name) : MenuItem(name) {}
-
-    /**
-     * @brief Adds an MenuItem into sub folder.
-     * @param item - MenuItem reference which should be added into sub folder.
-     */
-    inline void addItem(MenuItem& item) { items.push_back(&item); }
-
-    /**
-     * @brief Adds an SubMenu into sub folder.
-     * @param item - SubMenu reference which should be added into sub folder.
-     */
-    inline void addItem(SubMenu& item) { items.push_back(&item); }
+    SubMenuBase(std::string_view name, std::span<MenuItem*> items) : MenuItem(name), items(items) {}
 
     /**
      * @brief	Function for recognition whether it has children list or not.
@@ -85,10 +74,48 @@ class SubMenu : public MenuItem {
 
     bool hasChildrens(void) final { return true; }
 
- private:
+ protected:
     /**
      * @brief Vector of object in sub folder.
      */
+    std::span<MenuItem*> items;
+};
+
+template <size_t size>
+class SubMenu : public SubMenuBase {
+ public:
+    template <typename... Args>
+    SubMenu(std::string_view name, Args&... args) : SubMenuBase(name, items), items({&args...}) {}
+
+ private:
+    std::array<MenuItem*, size> items{};
+};
+
+template <>
+class SubMenu<std::dynamic_extent> : public SubMenuBase {
+ public:
+    template <typename... Args>
+    SubMenu(std::string_view name, Args&... args) : SubMenuBase(name, items), items({&args...}) {}
+
+    SubMenu(std::string_view name) : SubMenuBase(name, items), items({}) {}
+    /**
+     * @brief Adds an MenuItem into sub folder.
+     * @param item - MenuItem reference which should be added into sub folder.
+     */
+    inline void addItem(MenuItem& item) {
+        items.push_back(&item);
+        SubMenuBase::items = items;
+    }
+    /**
+     * @brief Adds an SubMenu into sub folder.
+     * @param item - SubMenu reference which should be added into sub folder.
+     */
+    inline void addItem(SubMenuBase& item) {
+        items.push_back(&item);
+        SubMenuBase::items = items;
+    }
+
+ private:
     std::vector<MenuItem*> items{};
 };
 

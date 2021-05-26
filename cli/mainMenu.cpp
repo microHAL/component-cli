@@ -49,7 +49,7 @@
 using namespace std::literals;
 
 namespace microhal {
-void MainMenu::goBack(int count) {
+void MainMenuBase::goBack(int count) {
     for (int c = 0; c < count; ++c) {
         if (activeMenu.size() > 1) {
             activeMenu.pop_back();
@@ -58,9 +58,9 @@ void MainMenu::goBack(int count) {
     }
 }
 
-void MainMenu::processCommand(std::string_view command, std::string_view parameters) {
+void MainMenuBase::processCommand(std::string_view command, std::string_view parameters) {
     int visitedFolders = 0;
-    SubMenu* activeSubMenu;
+    SubMenuBase* activeSubMenu;
 
     if (command.size()) {
         /* Searching the tree, getting words from string */
@@ -88,7 +88,7 @@ void MainMenu::processCommand(std::string_view command, std::string_view paramet
             if ((*it)->command(command, parameters, port)) {
                 if ((*it)->hasChildrens()) {
                     ++visitedFolders;
-                    activeMenu.push_back(static_cast<SubMenu*>(*it));
+                    activeMenu.push_back(static_cast<SubMenuBase*>(*it));
                 }
                 commandFound = true;
                 break;
@@ -102,8 +102,8 @@ void MainMenu::processCommand(std::string_view command, std::string_view paramet
     }
 }
 
-std::string_view MainMenu::showCommands(std::string_view command) {
-    SubMenu* pSubMenu = activeMenu.back();
+std::string_view MainMenuBase::showCommands(std::string_view command) {
+    SubMenuBase* pSubMenu = activeMenu.back();
     /* Just show commands */
     if (command.empty()) {
         for (auto it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
@@ -135,7 +135,7 @@ std::string_view MainMenu::showCommands(std::string_view command) {
     return {};
 }
 
-void MainMenu::drawPrompt() {
+void MainMenuBase::drawPrompt() {
     port.write("\n\r"sv);
     auto it = activeMenu.begin();
     ++it;
