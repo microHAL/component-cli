@@ -257,43 +257,26 @@ class ClockSet : public Clock {
 int main(void) {
     debugPort.open(IODevice::ReadWrite);
 
-    MainMenu _root(debugPort);
-
-    SubMenu _clock("clock");
-    _root.addItem(_clock);
-
-    SubMenu _car("car");
-    _root.addItem(_car);
     CarPrint carPrint;
     CarSet carSet;
-    _car.addItem(carPrint);
-    _car.addItem(carSet);
+    SubMenu<2> _car("car", carPrint, carSet);
 
-    ClockStatus cstat;
-    _clock.addItem(cstat);
-    ClockSet cset;
-    _clock.addItem(cset);
-    SubMenu _alarm("alarm");
-    _clock.addItem(_alarm);
-
-    SubMenu _emptySet("empty");
-    _root.addItem(_emptySet);
-    SubMenu _recursiveEmptySet("empty");
-    _emptySet.addItem(_recursiveEmptySet);
+    SubMenu<1> _recursiveEmptySet("empty");
+    SubMenu<1> _emptySet("empty", _recursiveEmptySet);
 
     AlarmOn aon;
-    _alarm.addItem(aon);
     AlarmOff aoff;
-    _alarm.addItem(aoff);
+    SubMenu<2> _alarm("alarm", aon, aoff);
 
-    SubMenu _memory("memory");
-    _root.addItem(_memory);
+    ClockStatus cstat;
+    ClockSet cset;
+    SubMenu<3> _clock("clock", cstat, cset, _alarm);
 
     MemorySave ms;
     MemoryRestore mr;
-    _memory.addItem(ms);
-    _memory.addItem(mr);
+    SubMenu<2> _memory("memory", ms, mr);
 
+    MainMenu<4> _root(debugPort, _clock, _car, _emptySet, _memory);
     CLI cli(debugPort, _root, "\n\r---------------------------- CLI DEMO -----------------------------\n\r");
 
     std::chrono::milliseconds dura(100);
