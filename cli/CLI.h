@@ -64,7 +64,7 @@ class CLI {
      * @param port - console IODevice port.
      * @param menu - MainMenu reference.
      */
-    CLI(IODevice &port, MainMenu &menu) : port(port), menu(menu), length(0), activeBuffer(0), previousBuffer(0) { init(); }
+    CLI(IODevice &port, MainMenuBase &menu) : port(port), menu(menu), length(0), activeBuffer(0), previousBuffer(0) { init(); }
 
     /**
      * @brief Initializes CLI device.
@@ -72,7 +72,7 @@ class CLI {
      * @param menu - MainMenu reference.
      * @param helloTxt - hello string.
      */
-    CLI(IODevice &port, MainMenu &menu, const char *helloTxt) : port(port), menu(menu), length(0), activeBuffer(0), previousBuffer(0) {
+    CLI(IODevice &port, MainMenuBase &menu, const char *helloTxt) : port(port), menu(menu), length(0), activeBuffer(0), previousBuffer(0) {
         port.write(helloTxt);
         init();
     }
@@ -99,7 +99,7 @@ class CLI {
     /**
      * @brief  MainMenu instance.
      */
-    MainMenu &menu;
+    MainMenuBase &menu;
     /**
      * @brief Chars buffer.
      */
