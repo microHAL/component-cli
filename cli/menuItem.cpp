@@ -42,12 +42,21 @@
  * @{
  */
 
-#include "microhal.h"
 #include "menuItem.h"
+#include "microhal.h"
 
-namespace microhal{
+namespace microhal {
 
+bool MenuItem::command(std::string_view command, std::string_view parameters, IODevice& port) {
+    if (command == name) {
+        port.write("\n\r");
+        execute(parameters, port);
+        return true;
+    }
+    return false;
 }
+
+}  // namespace microhal
 
 /**
  * example
@@ -63,5 +72,3 @@ namespace microhal{
  * components
  * @}
  */
-
-

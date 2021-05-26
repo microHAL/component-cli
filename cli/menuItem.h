@@ -50,19 +50,10 @@
 
 namespace microhal {
 
-class MainMenu;
-class SubMenu;
-class CLI;
-
 /**
  * @brief MenuItem class, the base of all menu elements. Friend of all inheriting items classes.
  */
-
 class MenuItem {
-    friend MainMenu;
-    friend SubMenu;
-    friend CLI;
-
  public:
     /**
      * @brief Constructs MenuItem instance.
@@ -77,14 +68,7 @@ class MenuItem {
      * @param command
      * @param port
      */
-    bool command(std::string_view command, std::string_view parameters, IODevice& port) {
-        if (command == name) {
-            port.write("\n\r");
-            execute(parameters, port);
-            return true;
-        }
-        return false;
-    }
+    bool command(std::string_view command, std::string_view parameters, IODevice& port);
 
     /**
      * @brief Executes command.
@@ -101,7 +85,6 @@ class MenuItem {
      */
     virtual inline bool hasChildrens(void) { return false; }
 
- protected:
     /**
      * @brief CLI object name.
      */
