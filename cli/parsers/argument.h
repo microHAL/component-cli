@@ -86,8 +86,8 @@ class Argument {
 
     signed char shortCommand;
     const string_view command;
-    string_view name;
-    string_view help;
+    const string_view name;
+    const string_view help;
 };
 
 }  // namespace cli
