@@ -188,10 +188,8 @@ void CLI::init() {
 void CLI::showCommands() {
     const auto buf = std::string_view(dataBuffer[activeBuffer], length);
     auto command = buf;
-    std::string_view parameters{};
     if (auto pos = buf.find(' '); pos != buf.npos) {
         command = buf.substr(0, pos);
-        parameters = buf.substr(pos + 1);
     }
     /* Last word is containing the sentence that should be complemented */
     std::string_view ret = menu.showCommands(command);
