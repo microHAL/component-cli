@@ -85,25 +85,25 @@ template <size_t size>
 class SubMenu : public SubMenuBase {
  public:
     template <typename... Args>
-    SubMenu(std::string_view name, Args&... args) : SubMenuBase(name, items), items({&args...}) {}
+    SubMenu(std::string_view name, Args&... args) : SubMenuBase(name, itemsContainer), itemsContainer({&args...}) {}
 
  private:
-    std::array<MenuItem*, size> items{};
+    std::array<MenuItem*, size> itemsContainer{};
 };
 
 template <>
 class SubMenu<std::dynamic_extent> : public SubMenuBase {
  public:
     template <typename... Args>
-    SubMenu(std::string_view name, Args&... args) : SubMenuBase(name, items), items({&args...}) {}
+    SubMenu(std::string_view name, Args&... args) : SubMenuBase(name, itemsContainer), itemsContainer({&args...}) {}
 
-    SubMenu(std::string_view name) : SubMenuBase(name, items), items({}) {}
+    SubMenu(std::string_view name) : SubMenuBase(name, itemsContainer), itemsContainer({}) {}
     /**
      * @brief Adds an MenuItem into sub folder.
      * @param item - MenuItem reference which should be added into sub folder.
      */
     inline void addItem(MenuItem& item) {
-        items.push_back(&item);
+        itemsContainer.push_back(&item);
         SubMenuBase::items = items;
     }
     /**
@@ -111,12 +111,12 @@ class SubMenu<std::dynamic_extent> : public SubMenuBase {
      * @param item - SubMenu reference which should be added into sub folder.
      */
     inline void addItem(SubMenuBase& item) {
-        items.push_back(&item);
+        itemsContainer.push_back(&item);
         SubMenuBase::items = items;
     }
 
  private:
-    std::vector<MenuItem*> items{};
+    std::vector<MenuItem*> itemsContainer{};
 };
 
 }  // namespace microhal
