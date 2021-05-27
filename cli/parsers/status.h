@@ -32,19 +32,16 @@ namespace microhal {
 namespace cli {
 
 enum class Status {
-    Success,
-    Error = 0x00,
-    UnrecognizedParameter,
-    MaxViolation = 0x01,      // argument value bigger than permitted (set biggest)
-    MinViolation = 0x02,      // argument value lesser than permitted (set smallest)
-    LengthViolation = 0x04,   // argument string do not suit given buffer (done nothing)
-    MissingArgument = 0x08,   // no argument given (returns default value)
-    IncorectArgument = 0x10,  // argument has wrong format (returns default value)
-    NoMnemonic = 0x20,        // no such mnemonic (returns default value)
-    OK = 0x40,                // returns appropriate value
-    HelpRequested,
-    NoArguments
-
+    Success = 0,
+    UnrecognizedParameter = 0b10,
+    MaxViolation = 0b100,           // argument value bigger than permitted (set biggest)
+    MinViolation = 0b1000,          // argument value lesser than permitted (set smallest)
+    LengthViolation = 0b1'0000,     // argument string do not suit given buffer (done nothing)
+    MissingArgument = 0b10'0000,    // no argument given
+    IncorectArgument = 0b100'0000,  // argument has wrong format
+    NoArguments = 0b1000'0000,
+    HelpRequested = 1'0000'0000,
+    Error = ~Success,
 };
 
 constexpr Status operator|(const Status lhs, const Status rhs) {
