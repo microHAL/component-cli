@@ -59,7 +59,7 @@ class MenuItem {
      * @brief Constructs MenuItem instance.
      * @param name - name of MenuItem object visible in CLI.
      */
-    MenuItem(std::string_view name) : name(name) {}
+    explicit constexpr MenuItem(std::string_view name) noexcept : name(name) {}
     virtual ~MenuItem() = default;
 
     /**
