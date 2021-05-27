@@ -59,7 +59,6 @@ void MainMenuBase::goBack(int count) {
 }
 
 void MainMenuBase::processCommand(std::string_view command, std::string_view parameters) {
-    int visitedFolders = 0;
     SubMenuBase* activeSubMenu;
 
     if (command.size()) {
@@ -83,6 +82,7 @@ void MainMenuBase::processCommand(std::string_view command, std::string_view par
             return;
         }
 
+        int visitedFolders = 0;
         bool commandFound = false;
         for (auto it = activeSubMenu->items.begin(); it != activeSubMenu->items.end(); ++it) {
             if ((*it)->command(command, parameters, port)) {
