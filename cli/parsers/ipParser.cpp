@@ -35,15 +35,18 @@ Status IPParser::parse(string_view str) {
 
     str = removeSpaces(str);
     if (str.size() == 0) return Status::MissingArgument;
+    IP tmpIp;
     for (uint_fast8_t i = 0; i < 4; i++) {
         auto dotPos = str.find('.');
         auto number = str.substr(0, dotPos);
         if (number.find(' ') != number.npos) return Status::IncorectArgument;
         auto [value, error] = fromStringView<uint8_t>(number);
         if (error != Status::Success) return Status::IncorectArgument;
-        m_ip.ip[3 - i] = value;
+        tmpIp.ip[3 - i] = value;
         str.remove_prefix(dotPos + 1);
     }
+    m_ip = tmpIp;
+    flag = flag | Flag::LastTimeParsed | Flag::Parsed;
     return Status::Success;
 }
 

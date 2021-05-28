@@ -49,6 +49,7 @@ class EnumParser : public Argument {
         auto result = map.keyFor(str);
         if (result.ec == std::errc()) {
             m_key = result.key;
+            flag = flag | Flag::LastTimeParsed | Flag::Parsed;
             return Status::Success;
         }
         return Status::Error;
@@ -81,7 +82,10 @@ class EnumParser : public Argument {
         return {buffer.data(), ptr};
     }
 
-    [[nodiscard]] key_t key() const { return m_key; }
+    [[nodiscard]] std::optional<key_t> key() const {
+        if (wasParsed()) return m_key;
+        return {};
+    }
 
  private:
     const Map map;

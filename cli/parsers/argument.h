@@ -39,13 +39,31 @@
 namespace microhal {
 namespace cli {
 
+namespace implementationDetail {
+enum class Flag : uint8_t { Required = 0b1, Parsed = 0b10, LastTimeParsed = 0b100 };
+
+constexpr Flag operator|(Flag lhs, Flag rhs) {
+    return static_cast<Flag>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+}
+
+constexpr Flag operator&(Flag lhs, Flag rhs) {
+    return static_cast<Flag>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+}
+
+}  // namespace implementationDetail
+
 class Argument {
  public:
     using string_view = std::string_view;
+    using Flag = implementationDetail::Flag;
 
     constexpr virtual ~Argument() = default;
 
     [[nodiscard]] constexpr virtual Status parse(string_view str) = 0;
+
+    [[nodiscard]] constexpr bool isRequired() const noexcept { return (flag & Flag::Required) == Flag::Required; }
+    [[nodiscard]] constexpr bool wasParsed() const noexcept { return (flag & Flag::Parsed) == Flag::Parsed; }
+    [[nodiscard]] constexpr bool wasLastTimeParsed() const noexcept { return (flag & Flag::LastTimeParsed) == Flag::LastTimeParsed; }
 
     [[nodiscard]] int_fast8_t correctCommand(string_view cmd);
     [[nodiscard]] virtual string_view formatArgument(std::span<char> buffer);
@@ -56,6 +74,8 @@ class Argument {
  protected:
     constexpr Argument(signed char shortCommand, string_view command, string_view name, string_view help)
         : shortCommand(shortCommand), command(command), name(name), help(help) {}
+
+    void clearLastTimeParsedFlag() { flag = flag & static_cast<Flag>(~static_cast<uint32_t>(Flag::LastTimeParsed)); }
 
     template <typename Type>
     [[nodiscard]] static auto fromStringView(string_view str, uint_fast8_t base = 10, Type min = std::numeric_limits<Type>::min(),
@@ -84,7 +104,8 @@ class Argument {
         return str;
     }
 
-    signed char shortCommand;
+    const signed char shortCommand;
+    Flag flag{};
     const string_view command;
     const string_view name;
     const string_view help;

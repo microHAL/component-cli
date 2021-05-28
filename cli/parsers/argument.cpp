@@ -34,8 +34,7 @@ namespace cli {
 int_fast8_t Argument::correctCommand(string_view cmd) {
     using namespace std::literals;
 
-    cmd.remove_prefix(cmd.find_first_not_of(' '));
-    if (auto pos = cmd.find_last_not_of(' '); pos != cmd.npos) cmd.remove_suffix(cmd.size() - pos - 1);
+    cmd = removeSpaces(cmd);
     if (cmd.starts_with("--"sv)) {
         if (cmd.substr(2) == command) return 1;
     } else if (shortCommand > 0 && cmd.starts_with('-') && cmd.size() == 2) {

@@ -42,16 +42,20 @@ class FlagParser : public Argument {
     [[nodiscard]] constexpr Status parse(string_view str) final {
         str = removeSpaces(str);
         if (str.size() == 0) {
-            flag = true;
+            flagStatus = true;
+            flag = flag | Flag::LastTimeParsed | Flag::Parsed;
             return Status::Success;
         }
         return Status::Error;
     }
 
-    [[nodiscard]] constexpr bool value() const noexcept { return flag; }
+    [[nodiscard]] constexpr std::optional<bool> value() const noexcept {
+        if (wasParsed()) return flagStatus;
+        return {};
+    }
 
  private:
-    bool flag = false;
+    bool flagStatus = false;
 };
 
 }  // namespace cli

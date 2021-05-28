@@ -34,17 +34,24 @@ Status IPMaskParser::parse(string_view str) {
     // Parse string: 255.255.255.0
 
     str = removeSpaces(str);
+    IP tmpIp;
     for (uint_fast8_t i = 0; i < 4; i++) {
         auto dotPos = str.find('.');
         auto number = str.substr(0, dotPos);
         if (number.find(' ') != number.npos) return Status::Error;
         auto [value, error] = fromStringView<uint8_t>(number);
         if (error != Status::Success) return Status::Error;
-        m_ip.ip[3 - i] = value;
+        tmpIp.ip[3 - i] = value;
         str.remove_prefix(dotPos + 1);
     }
 
-    return validateMask(m_ip) ? Status::Success : Status::Error;
+    if (validateMask(tmpIp)) {
+        m_ip = tmpIp;
+        flag = flag | Flag::LastTimeParsed | Flag::Parsed;
+        return Status::Success;
+    }
+
+    return Status::Error;
 }
 
 bool IPMaskParser::validateMask(IP mask) {

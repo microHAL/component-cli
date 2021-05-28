@@ -42,7 +42,10 @@ class IPMaskParser : public Argument {
 
     [[nodiscard]] Status parse(string_view str) final;
 
-    [[nodiscard]] std::optional<const IP> mask() const { return m_ip; }
+    [[nodiscard]] std::optional<IP> mask() const {
+        if (wasParsed()) return m_ip;
+        return {};
+    }
 
  private:
     IP m_ip{};

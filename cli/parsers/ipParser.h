@@ -41,7 +41,10 @@ class IPParser : public Argument {
 
     [[nodiscard]] Status parse(string_view str) final;
 
-    [[nodiscard]] std::optional<const IP> ip() const { return m_ip; }
+    [[nodiscard]] std::optional<const IP> ip() const {
+        if (wasParsed()) return m_ip;
+        return {};
+    }
 
  private:
     IP m_ip{};
