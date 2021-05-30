@@ -35,6 +35,7 @@ using namespace std::literals;
 
 TEST_CASE("Test Flag Parser") {
     StringParser str('s', "str", "string", "String parser help text", 1, 20);
-    CHECK(str.parse("Parsed string") == Status::Success);
-    CHECK(str.value() == "Parsed string"sv);
+    auto [value, status] = str.parse("Parsed string", str);
+    CHECK(status == Status::Success);
+    CHECK(value == "Parsed string"sv);
 }

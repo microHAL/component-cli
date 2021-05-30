@@ -30,42 +30,40 @@
 namespace microhal {
 namespace cli {
 
-Status NumericParser<float>::parse(string_view str) {
+std::pair<float, Status> NumericParser<float>::parse(string_view str, const this_type &object) {
     str = removeSpaces(str);
-    if (str.size() == 0) return Status::MissingArgument;
+    if (str.size() == 0) return {{}, Status::MissingArgument};
     // spaces in the middle of data are not allowed, return error
-    if (str.find(' ') != str.npos) return Status::IncorectArgument;
+    if (str.find(' ') != str.npos) return {{}, Status::IncorectArgument};
 
     std::array<char, 30> buffer;
-    if (str.size() > buffer.size()) return Status::Error;
+    if (str.size() > buffer.size()) return {{}, Status::Error};
     std::copy_n(str.begin(), str.size(), buffer.data());
     buffer[str.size()] = 0;
     char *str_end;
     float tmp = strtof(buffer.data(), &str_end);
-    if (str_end == buffer.data()) return Status::IncorectArgument;
-    if (tmp > max || tmp == HUGE_VALF) return Status::MaxViolation;
-    if (tmp < min) return Status::MinViolation;
-    parsedValue = tmp;
-    return Status::Success;
+    if (str_end == buffer.data()) return {{}, Status::IncorectArgument};
+    if (tmp > object.max || tmp == HUGE_VALF) return {{}, Status::MaxViolation};
+    if (tmp < object.min) return {{}, Status::MinViolation};
+    return {tmp, Status::Success};
 }
 
-Status NumericParser<double>::parse(string_view str) {
+std::pair<double, Status> NumericParser<double>::parse(string_view str, const this_type &object) {
     str = removeSpaces(str);
-    if (str.size() == 0) return Status::MissingArgument;
+    if (str.size() == 0) return {{}, Status::MissingArgument};
     // spaces in the middle of data are not allowed, return error
-    if (str.find(' ') != str.npos) return Status::IncorectArgument;
+    if (str.find(' ') != str.npos) return {{}, Status::IncorectArgument};
 
     std::array<char, 30> buffer;
-    if (str.size() > buffer.size()) return Status::Error;
+    if (str.size() > buffer.size()) return {{}, Status::Error};
     std::copy_n(str.begin(), str.size(), buffer.data());
     buffer[str.size()] = 0;
     char *str_end;
     float tmp = strtod(buffer.data(), &str_end);
-    if (str_end == buffer.data()) return Status::IncorectArgument;
-    if (tmp > max || tmp == HUGE_VAL) return Status::MaxViolation;
-    if (tmp < min) return Status::MinViolation;
-    parsedValue = tmp;
-    return Status::Success;
+    if (str_end == buffer.data()) return {{}, Status::IncorectArgument};
+    if (tmp > object.max || tmp == HUGE_VAL) return {{}, Status::MaxViolation};
+    if (tmp < object.min) return {{}, Status::MinViolation};
+    return {tmp, Status::Success};
 }
 
 }  // namespace cli

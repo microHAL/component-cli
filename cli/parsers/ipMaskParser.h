@@ -38,18 +38,14 @@ namespace cli {
 
 class IPMaskParser : public Argument {
  public:
+    using this_type = IPMaskParser;
+    using value_type = IP;
+
     constexpr IPMaskParser(string_view command, string_view name, string_view help) : Argument(-1, command, name, help) {}
 
-    [[nodiscard]] Status parse(string_view str) final;
-
-    [[nodiscard]] std::optional<IP> mask() const {
-        if (wasParsed()) return m_ip;
-        return {};
-    }
+    [[nodiscard]] static std::pair<value_type, Status> parse(string_view str, const this_type& object);
 
  private:
-    IP m_ip{};
-
     [[nodiscard]] static bool validateMask(IP mask);
 };
 

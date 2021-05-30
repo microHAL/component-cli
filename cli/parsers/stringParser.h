@@ -36,17 +36,17 @@ namespace cli {
 
 class StringParser : public Argument {
  public:
+    using this_type = StringParser;
+    using value_type = std::string;
+
     constexpr StringParser(signed char shortCommand, string_view command, string_view name, string_view help, uint16_t minLength, uint16_t maxLength)
         : Argument(shortCommand, command, name, help), maxLength(maxLength), minLength(minLength) {}
 
-    [[nodiscard]] Status parse(string_view str) final;
-
-    [[nodiscard]] constexpr string_view value() const noexcept { return string; }
+    [[nodiscard]] static std::pair<string_view, Status> parse(string_view str, const this_type& object);
 
  private:
     const uint16_t maxLength;
     const uint16_t minLength;
-    string_view string{};
 };
 
 }  // namespace cli

@@ -33,42 +33,7 @@ using namespace std::literals;
 namespace microhal {
 namespace cli {
 
-Status ArgumentParser::parse(std::string_view argumentsString, IODevice &ioDevice) {
-    // remove leading and trailing spaces
-    argumentsString = removeSpaces(argumentsString);
-
-    if (argumentsString.size() == 0 && arguments.size() != 0) return Status::NoArguments;
-    // decode all parameters
-    do {
-        const auto pos = argumentsString.find('-');
-        if (pos != argumentsString.npos) {
-            const auto argument = argumentsString.substr(pos, argumentsString.find(' ', pos));
-            if (isHelpArgument(argument)) {
-                showUsage(ioDevice);
-                return Status::HelpRequested;
-            }
-            bool argumentConsumed = false;
-            for (auto &arg : arguments) {
-                if (auto parameterCount = arg->correctCommand(argument); parameterCount >= 0) {
-                    const auto parameter = getParameters(argumentsString.substr(pos + argument.size()), parameterCount);
-                    if (auto status = arg->parse(parameter); status != Status::Success) return status;
-
-                    argumentsString.remove_prefix(std::distance(argumentsString.begin(), parameter.end()));
-                    argumentConsumed = true;
-                    break;
-                }
-            }
-            if (!argumentConsumed) {
-                ioDevice.write("\n\r\tUnrecognized parameter: "sv);
-                ioDevice.write(argument);
-                return Status::UnrecognizedParameter;
-            }
-        }
-    } while (argumentsString.size());
-    return Status::Success;
-}
-
-void ArgumentParser::showUsage(IODevice &ioDevice) {
+void ArgumentParserBase::showUsage(IODevice &ioDevice, std::span<const Argument *const> arguments) const {
     constexpr const std::string_view usage = "usage: ";
     constexpr const std::string_view endl = "\n\r";
     ioDevice.write(usage);
@@ -103,14 +68,14 @@ void ArgumentParser::showUsage(IODevice &ioDevice) {
     ioDevice.write(endl);
 }
 
-bool ArgumentParser::isHelpArgument(std::string_view argument) {
+bool ArgumentParserBase::isHelpArgument(std::string_view argument) {
     // remove leading and trailing spaces
     argument = removeSpaces(argument);
 
     return argument == "-h"sv || argument == "--help"sv;
 }
 
-std::string_view ArgumentParser::getParameters(std::string_view arguments, int8_t argumentsCount) {
+std::string_view ArgumentParserBase::getParameters(std::string_view arguments, int8_t argumentsCount) {
     // remove leading and trailing spaces
     arguments = removeSpaces(arguments);
 

@@ -30,21 +30,20 @@
 namespace microhal {
 namespace cli {
 
-Status StringParser::parse(string_view str) {
+std::pair<StringParser::string_view, Status> StringParser::parse(string_view str, const this_type& object) {
     str = removeSpaces(str);
-    if (str.size() == 0) return Status::IncorectArgument;
+    if (str.size() == 0) return {{}, Status::IncorectArgument};
     if (str.starts_with('"')) {
         str.remove_prefix(1);
         if (str.ends_with('"'))
             str.remove_suffix(1);
         else
-            return Status::IncorectArgument;
+            return {{}, Status::IncorectArgument};
     }
     // at this point all " should be removed
-    if (str.find('"') != str.npos) return Status::IncorectArgument;
-    if (str.size() > maxLength || str.size() < minLength) return Status::LengthViolation;
-    string = str;
-    return Status::Success;
+    if (str.find('"') != str.npos) return {{}, Status::IncorectArgument};
+    if (str.size() > object.maxLength || str.size() < object.minLength) return {{}, Status::LengthViolation};
+    return {str, Status::Success};
 }
 
 }  // namespace cli

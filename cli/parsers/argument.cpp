@@ -31,7 +31,7 @@
 namespace microhal {
 namespace cli {
 
-int_fast8_t Argument::correctCommand(string_view cmd) {
+int_fast8_t Argument::correctCommand(string_view cmd) const {
     using namespace std::literals;
 
     cmd = removeSpaces(cmd);
@@ -43,7 +43,7 @@ int_fast8_t Argument::correctCommand(string_view cmd) {
     return -1;
 }
 
-Argument::string_view Argument::formatArgument(std::span<char> buffer) {
+Argument::string_view Argument::formatArgument(std::span<char> buffer) const {
     const auto nameSize = name.size() > 0 ? name.size() + 1 : 0;
     if (shortCommand > 0) {
         if (buffer.size() >= 4 + nameSize) {
@@ -78,7 +78,7 @@ Argument::string_view Argument::formatArgument(std::span<char> buffer) {
     return {};
 }
 
-Argument::string_view Argument::formatHelpEntry(std::span<char> buffer) {
+Argument::string_view Argument::formatHelpEntry(std::span<char> buffer) const {
     auto requiredSize = shortCommand > 0 ? name.size() + 6 : 1;
     requiredSize += command.size() ? command.size() + name.size() + 3 : 0;
     if (buffer.size() < requiredSize) return {};

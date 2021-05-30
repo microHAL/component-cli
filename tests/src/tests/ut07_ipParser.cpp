@@ -35,54 +35,73 @@ using namespace cli;
 using namespace std::literals;
 
 TEST_CASE("Test IP Parser") {
-    IPParser ipParser("ip", "ip", "Static network addres.");
+    static constexpr IPParser ipParser("ip", "ip", "Static network addres.");
     char buffer[30];
     CHECK(ipParser.formatArgument(buffer) == "[--ip ip]"sv);
     CHECK(ipParser.formatHelpEntry(buffer) == " --ip ip"sv);
 
-    CHECK(ipParser.parse("0.0.0.0") == Status::Success);
-    CHECK(ipParser.ip() == IP{0, 0, 0, 0});
+    {
+        auto [value, status] = ipParser.parse("0.0.0.0", ipParser);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{0, 0, 0, 0});
+    }
+    {
+        auto [value, status] = ipParser.parse("255.255.255.255", ipParser);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{255, 255, 255, 255});
+    }
+    {
+        auto [value, status] = ipParser.parse("1.1.1.1", ipParser);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{1, 1, 1, 1});
+    }
+    {
+        auto [value, status] = ipParser.parse("10.10.10.10", ipParser);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{10, 10, 10, 10});
+    }
+    {
+        auto [value, status] = ipParser.parse("100.100.100.100", ipParser);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{100, 100, 100, 100});
+    }
+    {
+        auto [value, status] = ipParser.parse("192.168.1.1", ipParser);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{192, 168, 1, 1});
+    }
+    {
+        auto [value, status] = ipParser.parse(" 192.168.1.1 ", ipParser);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{192, 168, 1, 1});
+    }
+    CHECK(ipParser.parse("1.1.1. 1", ipParser).second == Status::IncorectArgument);
 
-    CHECK(ipParser.parse("255.255.255.255") == Status::Success);
-    CHECK(ipParser.ip() == IP{255, 255, 255, 255});
+    CHECK(ipParser.parse("1.1.1 .1", ipParser).second == Status::IncorectArgument);
 
-    CHECK(ipParser.parse("1.1.1.1") == Status::Success);
-    CHECK(ipParser.ip() == IP{1, 1, 1, 1});
+    CHECK(ipParser.parse("1.1 . 1.1", ipParser).second == Status::IncorectArgument);
 
-    CHECK(ipParser.parse("10.10.10.10") == Status::Success);
-    CHECK(ipParser.ip() == IP{10, 10, 10, 10});
-
-    CHECK(ipParser.parse("100.100.100.100") == Status::Success);
-    CHECK(ipParser.ip() == IP{100, 100, 100, 100});
-
-    CHECK(ipParser.parse("192.168.1.1") == Status::Success);
-    CHECK(ipParser.ip() == IP{192, 168, 1, 1});
-
-    CHECK(ipParser.parse(" 192.168.1.1 ") == Status::Success);
-    CHECK(ipParser.ip() == IP{192, 168, 1, 1});
-
-    CHECK(ipParser.parse("1.1.1. 1") == Status::IncorectArgument);
-
-    CHECK(ipParser.parse("1.1.1 .1") == Status::IncorectArgument);
-
-    CHECK(ipParser.parse("1.1 . 1.1") == Status::IncorectArgument);
-
-    CHECK(ipParser.parse("1.256.1.1") == Status::IncorectArgument);
+    CHECK(ipParser.parse("1.256.1.1", ipParser).second == Status::IncorectArgument);
 }
 
 TEST_CASE("Test IP Mask Parser") {
-    IPMaskParser mask("mask", "mask", "Network mask");
-
-    CHECK(mask.parse("255.255.255.0") == Status::Success);
-    CHECK(mask.mask() == IP{255, 255, 255, 0});
-
-    CHECK(mask.parse("255.255.255.255") == Status::Success);
-    CHECK(mask.mask() == IP{255, 255, 255, 255});
-
-    CHECK(mask.parse("0.0.0.0") == Status::Success);
-    CHECK(mask.mask() == IP{0, 0, 0, 0});
-
-    CHECK(mask.parse("255.255.0.255") == Status::Error);
-    CHECK(mask.parse("0.255.255.255") == Status::Error);
-    CHECK(mask.parse("255.255.255.253") == Status::Error);
+    constexpr IPMaskParser mask("mask", "mask", "Network mask");
+    {
+        auto [value, status] = mask.parse("255.255.255.0", mask);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{255, 255, 255, 0});
+    }
+    {
+        auto [value, status] = mask.parse("255.255.255.255", mask);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{255, 255, 255, 255});
+    }
+    {
+        auto [value, status] = mask.parse("0.0.0.0", mask);
+        CHECK(status == Status::Success);
+        CHECK(value == IP{0, 0, 0, 0});
+    }
+    CHECK(mask.parse("255.255.0.255", mask).second == Status::IncorectArgument);
+    CHECK(mask.parse("0.255.255.255", mask).second == Status::IncorectArgument);
+    CHECK(mask.parse("255.255.255.253", mask).second == Status::IncorectArgument);
 }

@@ -28,6 +28,8 @@
 #ifndef SRC_CLI_PARSERS_ARGUMENTPARSER_H_
 #define SRC_CLI_PARSERS_ARGUMENTPARSER_H_
 
+#include <bitset>
+#include <span>
 #include <string_view>
 #include <vector>
 #include "argument.h"
@@ -36,23 +38,42 @@
 namespace microhal {
 namespace cli {
 
-class ArgumentParser {
+template <typename _Tp, size_t... _Idx>
+constexpr std::array<char, sizeof...(_Idx)> _to_array(_Tp (&__a)[sizeof...(_Idx)], std::index_sequence<_Idx...>) {
+    return {{__a[_Idx]...}};
+}
+
+template <size_t N>
+struct NameContainer {
+    constexpr NameContainer(const char (&name)[N]) : nameM{_to_array(name, std::make_index_sequence<N>{})} {}
+
+    constexpr std::string_view asStringView() const { return {nameM.data(), nameM.size() - 1}; }
+
+    const std::array<char, N> nameM;
+};
+
+template <size_t N>
+constexpr int index([[maybe_unused]] int i, [[maybe_unused]] const NameContainer<N> &lhs) {
+    return -1;
+}
+
+template <size_t N>
+constexpr int index(int i, const NameContainer<N> &lhs, const auto &rhs, const auto &... rest) {
+    if (lhs.asStringView() == rhs.name) return i;
+    return index(i + 1, lhs, rest...);
+}
+
+class ArgumentParserBase {
  public:
     using string_view = std::string_view;
 
-    ArgumentParser(string_view name, string_view description) : name(name), description(description) {}
+    ArgumentParserBase(string_view name, string_view description) : name(name), description(description) {}
 
-    void addArgument(Argument &arg) { arguments.push_back(&arg); }
+    static bool isHelpArgument(std::string_view);
+    static std::string_view getParameters(std::string_view arguments, int8_t argumentsCount);
+    void showUsage(IODevice &ioDevice, std::span<const Argument *const> arguments) const;
 
-    [[nodiscard]] Status parse(std::string_view argumentsString, IODevice &ioDevice);
-
-    void showUsage(IODevice &ioDevice);
-
- private:
-    bool isHelpArgument(std::string_view);
-    std::string_view getParameters(std::string_view arguments, int8_t argumentsCount);
-
-    std::vector<Argument *> arguments{};
+ protected:
     std::string_view name;
     std::string_view description;
 
@@ -64,6 +85,92 @@ class ArgumentParser {
         return str;
     }
 };
+
+template <auto &... parsers>
+class ArgumentParser : public ArgumentParserBase {
+ public:
+    using string_view = std::string_view;
+
+    ArgumentParser(string_view name, string_view description) : ArgumentParserBase(name, description) {}
+
+    [[nodiscard]] Status parse(std::string_view argumentsString, IODevice &ioDevice) {
+        using namespace std::literals;
+        // remove leading and trailing spaces
+        argumentsString = removeSpaces(argumentsString);
+        if (argumentsString.size() == 0 && sizeof...(parsers) != 0) return Status::NoArguments;
+        wasParsed.reset();
+        // decode all parameters
+        do {
+            const auto pos = argumentsString.find('-');
+            if (pos != argumentsString.npos) {
+                argumentsString.remove_prefix(pos);
+                const auto argument = argumentsString.substr(0, argumentsString.find(' '));
+                if (isHelpArgument(argument)) {
+                    showUsage(ioDevice);
+                    return Status::HelpRequested;
+                }
+                auto status = parseImpl<0>(argumentsString, parsers...);
+                if (status == Status::UnrecognizedParameter) {
+                    ioDevice.write("\n\r\tUnrecognized parameter: "sv);
+                    ioDevice.write(argument);
+                    return Status::UnrecognizedParameter;
+                }
+                argumentsString.remove_prefix(argument.size());
+            } else {
+                break;
+            }
+        } while (argumentsString.size());
+
+        return Status::Success;
+    }
+
+    template <NameContainer name>
+    int get() {
+        constexpr int i = index(0, name, parsers...);
+        static_assert(i >= 0);
+        return std::get<i>(parsedData);
+    }
+
+    void showUsage(IODevice &ioDevice) {
+        const std::array<const Argument *, sizeof...(parsers)> argumentParsers{&parsers...};
+        ArgumentParserBase::showUsage(ioDevice, argumentParsers);
+    }
+
+ private:
+    std::bitset<sizeof...(parsers)> wasParsed{};
+    std::tuple<typename std::remove_reference<decltype(parsers)>::type::value_type...> parsedData{};
+
+    template <size_t i, typename T>
+    Status parseImpl(std::string_view str, const T &arg) {
+        const auto argument = str.substr(0, str.find(' ', 0));
+        if (auto parameterCount = arg.correctCommand(argument); parameterCount >= 0) {
+            const auto parameter = getParameters(str.substr(0 + argument.size()), parameterCount);
+            auto [value, status] = T::parse(parameter, arg);
+            if (status == Status::Success) {
+                std::get<i>(parsedData) = value;
+                wasParsed[i] = 1;
+            }
+            return status;
+        }
+        return Status::UnrecognizedParameter;
+    }
+
+    template <size_t index, typename T>
+    Status parseImpl(std::string_view str, const T &arg, auto... args) {
+        const auto argument = str.substr(0, str.find(' ', 0));
+        if (auto parameterCount = arg.correctCommand(argument); parameterCount >= 0) {
+            // argument matched parser
+            const auto parameter = getParameters(str.substr(0 + argument.size()), parameterCount);
+            auto [value, status] = T::parse(parameter, arg);
+            if (status == Status::Success) {
+                std::get<index>(parsedData) = value;
+                wasParsed[index] = 1;
+            }
+            return status;
+        }
+        return parseImpl<index + 1>(str, args...);
+    }
+};  // namespace cli
 
 }  // namespace cli
 }  // namespace microhal

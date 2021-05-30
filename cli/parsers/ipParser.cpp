@@ -30,24 +30,23 @@
 namespace microhal {
 namespace cli {
 
-Status IPParser::parse(string_view str) {
+std::pair<IPParser::value_type, Status> IPParser::parse(string_view str, const this_type& object) {
     // Parse string: 192.168.11.1
 
     str = removeSpaces(str);
-    if (str.size() == 0) return Status::MissingArgument;
+    if (str.size() == 0) return {{}, Status::MissingArgument};
     IP tmpIp;
     for (uint_fast8_t i = 0; i < 4; i++) {
         auto dotPos = str.find('.');
         auto number = str.substr(0, dotPos);
-        if (number.find(' ') != number.npos) return Status::IncorectArgument;
-        auto [value, error] = fromStringView<uint8_t>(number);
-        if (error != Status::Success) return Status::IncorectArgument;
+        if (number.find(' ') != number.npos) return {{}, Status::IncorectArgument};
+        auto [value, error] = IPParser::fromStringView<uint8_t>(number);
+        if (error != Status::Success) return {{}, Status::IncorectArgument};
         tmpIp.ip[3 - i] = value;
         str.remove_prefix(dotPos + 1);
     }
-    m_ip = tmpIp;
-    flag = flag | Flag::LastTimeParsed | Flag::Parsed;
-    return Status::Success;
+
+    return {tmpIp, Status::Success};
 }
 
 }  // namespace cli

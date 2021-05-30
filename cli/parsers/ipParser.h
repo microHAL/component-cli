@@ -37,17 +37,12 @@ namespace cli {
 
 class IPParser : public Argument {
  public:
+    using this_type = IPParser;
+    using value_type = IP;
+
     constexpr IPParser(string_view command, string_view name, string_view help) : Argument(-1, command, name, help) {}
 
-    [[nodiscard]] Status parse(string_view str) final;
-
-    [[nodiscard]] std::optional<const IP> ip() const {
-        if (wasParsed()) return m_ip;
-        return {};
-    }
-
- private:
-    IP m_ip{};
+    [[nodiscard]] static std::pair<value_type, Status> parse(string_view str, const this_type& object);
 };
 
 }  // namespace cli

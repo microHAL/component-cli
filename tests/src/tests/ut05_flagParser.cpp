@@ -35,6 +35,5 @@ using namespace std::literals;
 
 TEST_CASE("Test Flag Parser") {
     FlagParser flag('f', "flag", "Flag help text");
-    CHECK(flag.parse("") == Status::Success);
-    CHECK(flag.value());
+    CHECK(flag.parse("", flag).second == Status::Success);
 }

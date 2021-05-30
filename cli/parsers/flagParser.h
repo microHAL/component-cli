@@ -36,26 +36,18 @@ namespace cli {
 
 class FlagParser : public Argument {
  public:
-    constexpr FlagParser(signed char shortCommand, string_view command, string_view help) : Argument(shortCommand, command, {}, help) {}
-    constexpr ~FlagParser() = default;
+    using this_type = FlagParser;
+    using value_type = bool;
 
-    [[nodiscard]] constexpr Status parse(string_view str) final {
+    constexpr FlagParser(signed char shortCommand, string_view command, string_view help) : Argument(shortCommand, command, {}, help) {}
+
+    [[nodiscard]] constexpr static std::pair<value_type, Status> parse(string_view str, [[maybe_unused]] const this_type& object) {
         str = removeSpaces(str);
         if (str.size() == 0) {
-            flagStatus = true;
-            flag = flag | Flag::LastTimeParsed | Flag::Parsed;
-            return Status::Success;
+            return {true, Status::Success};
         }
-        return Status::Error;
+        return {false, Status::Error};
     }
-
-    [[nodiscard]] constexpr std::optional<bool> value() const noexcept {
-        if (wasParsed()) return flagStatus;
-        return {};
-    }
-
- private:
-    bool flagStatus = false;
 };
 
 }  // namespace cli

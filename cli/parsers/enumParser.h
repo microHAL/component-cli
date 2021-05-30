@@ -38,24 +38,24 @@ template <typename Map>
 class EnumParser : public Argument {
  public:
     using key_t = typename Map::key_t;
+    using this_type = EnumParser<Map>;
+    using value_type = key_t;
 
     constexpr EnumParser(Map &map, char shortCommand, string_view command, string_view help)
         : Argument(shortCommand, command, "{...}", help), map(map) {}
 
     constexpr ~EnumParser() = default;
 
-    [[nodiscard]] constexpr Status parse(string_view str) final {
+    [[nodiscard]] constexpr static std::pair<value_type, Status> parse(string_view str, const this_type &object) {
         str = removeSpaces(str);
-        auto result = map.keyFor(str);
+        auto result = object.map.keyFor(str);
         if (result.ec == std::errc()) {
-            m_key = result.key;
-            flag = flag | Flag::LastTimeParsed | Flag::Parsed;
-            return Status::Success;
+            return {result.key, Status::Success};
         }
-        return Status::Error;
+        return {{}, Status::Error};
     }
 
-    [[nodiscard]] string_view formatArgument(std::span<char> buffer) final {
+    [[nodiscard]] string_view formatArgument(std::span<char> buffer) const {
         buffer[0] = '[';
         buffer[1] = '-';
         char *ptr = &buffer[3];
@@ -82,14 +82,9 @@ class EnumParser : public Argument {
         return {buffer.data(), ptr};
     }
 
-    [[nodiscard]] std::optional<key_t> key() const {
-        if (wasParsed()) return m_key;
-        return {};
-    }
-
  private:
     const Map map;
-    key_t m_key{};
+
 };  // namespace cli
 
 }  // namespace cli
