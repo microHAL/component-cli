@@ -125,7 +125,7 @@ class ArgumentParser : public ArgumentParserBase {
     }
 
     template <NameContainer name>
-    int get() {
+    auto get() {
         constexpr int i = index(0, name, parsers...);
         static_assert(i >= 0);
         return std::get<i>(parsedData);
