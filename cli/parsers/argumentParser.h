@@ -71,7 +71,7 @@ class ArgumentParserBase {
 
     static bool isHelpArgument(std::string_view);
     static std::string_view getParameters(std::string_view arguments, int8_t argumentsCount);
-    void showUsage(IODevice &ioDevice, std::span<const Argument *const> arguments) const;
+    void showUsage(IODevice &ioDevice, const std::span<const Argument *const> arguments) const;
 
  protected:
     std::string_view name;
@@ -131,14 +131,12 @@ class ArgumentParser : public ArgumentParserBase {
         return std::get<i>(parsedData);
     }
 
-    void showUsage(IODevice &ioDevice) {
-        const std::array<const Argument *, sizeof...(parsers)> argumentParsers{&parsers...};
-        ArgumentParserBase::showUsage(ioDevice, argumentParsers);
-    }
+    void showUsage(IODevice &ioDevice) { ArgumentParserBase::showUsage(ioDevice, argumentParsers); }
 
  private:
     std::bitset<sizeof...(parsers)> wasParsed{};
     std::tuple<typename std::remove_reference<decltype(parsers)>::type::value_type...> parsedData{};
+    const std::array<const Argument *, sizeof...(parsers)> argumentParsers{&parsers...};
 
     template <size_t i, typename T>
     Status parseImpl(std::string_view str, const T &arg) {
