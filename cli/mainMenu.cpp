@@ -59,13 +59,8 @@ void MainMenuBase::goBack(int count) {
 }
 
 void MainMenuBase::processCommand(std::string_view command, std::string_view parameters) {
-    SubMenuBase* activeSubMenu;
-
     if (command.size()) {
-        /* Searching the tree, getting words from string */
-        activeSubMenu = activeMenu.back();
         /* SubMenu branches searching */
-
         if ("exit"sv == command) {
             /* Returning to root folder */
             while (activeMenu.size() > 1)
@@ -84,11 +79,13 @@ void MainMenuBase::processCommand(std::string_view command, std::string_view par
 
         int visitedFolders = 0;
         bool commandFound = false;
-        for (auto it = activeSubMenu->items.begin(); it != activeSubMenu->items.end(); ++it) {
-            if ((*it)->command(command, parameters, port)) {
-                if ((*it)->hasChildrens()) {
+        /* Searching the tree, getting words from string */
+        SubMenuBase* activeSubMenu = activeMenu.back();
+        for (auto subMenu : activeSubMenu->items) {
+            if (subMenu->command(command, parameters, port)) {
+                if (subMenu->hasChildrens()) {
                     ++visitedFolders;
-                    activeMenu.push_back(static_cast<SubMenuBase*>(*it));
+                    activeMenu.push_back(static_cast<SubMenuBase*>(subMenu));
                 }
                 commandFound = true;
                 break;
@@ -106,29 +103,29 @@ std::string_view MainMenuBase::showCommands(std::string_view command) {
     SubMenuBase* pSubMenu = activeMenu.back();
     /* Just show commands */
     if (command.empty()) {
-        for (auto it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
+        for (auto item : pSubMenu->items) {
             port.write("\n\r\t"sv);
-            port.write((*it)->name);
+            port.write(item->name);
         }
         return {};
     }
     /* Processing and appending letters, pSubMenu is the current subfolder */
     /* Counting how many candidates has the same prefix */
     int samePrefixCnt = 0;
-    for (auto it = pSubMenu->items.begin(); it != pSubMenu->items.end(); it++) {
-        if ((*it)->name.starts_with(command)) {
+    for (auto item : pSubMenu->items) {
+        if (item->name.starts_with(command)) {
             ++samePrefixCnt;
         }
     }
     /* Show candidates with the same prefix */
-    for (auto it = pSubMenu->items.begin(); it != pSubMenu->items.end(); ++it) {
-        if ((*it)->name.starts_with(command)) {
+    for (auto item : pSubMenu->items) {
+        if (item->name.starts_with(command)) {
             if (1 == samePrefixCnt) {
                 /* Append letters */
-                return (*it)->name.substr(command.size());
+                return item->name.substr(command.size());
             } else if (samePrefixCnt > 1) {
                 port.write("\n\r\t\t "sv);
-                port.write((*it)->name);
+                port.write(item->name);
             }
         }
     }
