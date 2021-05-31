@@ -121,6 +121,9 @@ class ArgumentParser : public ArgumentParserBase {
             }
         } while (argumentsString.size());
 
+        if (!wasRequiredArgumentsParsed<0>(parsers...)) {
+            return Status::MissingArgument;
+        }
         return Status::Success;
     }
 
@@ -170,7 +173,19 @@ class ArgumentParser : public ArgumentParserBase {
         }
         return parseImpl<index + 1>(str, args...);
     }
-};  // namespace cli
+
+    template <size_t index, typename T>
+    bool wasRequiredArgumentsParsed(const T &arg) {
+        if (arg.isRequired() && !wasParsed[index]) return false;
+        return true;
+    }
+
+    template <size_t index, typename T>
+    bool wasRequiredArgumentsParsed(const T &arg, const auto &... args) {
+        if (arg.isRequired() && !wasParsed[index]) return false;
+        return wasRequiredArgumentsParsed<index + 1>(args...);
+    }
+};
 
 }  // namespace cli
 }  // namespace microhal

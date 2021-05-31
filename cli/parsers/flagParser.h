@@ -39,7 +39,8 @@ class FlagParser : public Argument {
     using this_type = FlagParser;
     using value_type = bool;
 
-    constexpr FlagParser(signed char shortCommand, string_view command, string_view help) : Argument(shortCommand, command, {}, help) {}
+    constexpr FlagParser(signed char shortCommand, string_view command, string_view name, Flag flags, string_view help)
+        : Argument(shortCommand, command, name, flags | Flag::Flag, help) {}
 
     [[nodiscard]] constexpr static std::pair<value_type, Status> parse(string_view str, [[maybe_unused]] const this_type& object) {
         str = removeSpaces(str);

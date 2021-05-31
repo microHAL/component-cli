@@ -41,10 +41,8 @@ class EnumParser : public Argument {
     using this_type = EnumParser<Map>;
     using value_type = key_t;
 
-    constexpr EnumParser(Map &map, char shortCommand, string_view command, string_view help)
-        : Argument(shortCommand, command, "{...}", help), map(map) {}
-
-    constexpr ~EnumParser() = default;
+    constexpr EnumParser(Map &map, char shortCommand, string_view command, Flag flags, string_view help)
+        : Argument(shortCommand, command, "{...}", flags, help), map(map) {}
 
     [[nodiscard]] constexpr static std::pair<value_type, Status> parse(string_view str, const this_type &object) {
         str = removeSpaces(str);

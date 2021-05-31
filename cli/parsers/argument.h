@@ -40,7 +40,7 @@ namespace microhal {
 namespace cli {
 
 namespace implementationDetail {
-enum class Flag : uint8_t { Required = 0b1, Parsed = 0b10, LastTimeParsed = 0b100 };
+enum class Flag : uint8_t { Optional = 0, Required = 0b1, Flag = 0b10 };
 
 constexpr Flag operator|(Flag lhs, Flag rhs) {
     return static_cast<Flag>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
@@ -57,7 +57,8 @@ class Argument {
     using string_view = std::string_view;
     using Flag = implementationDetail::Flag;
 
-    [[nodiscard]] constexpr bool isRequired() const noexcept { return (flag & Flag::Required) == Flag::Required; }
+    [[nodiscard]] constexpr bool isRequired() const noexcept { return (flags & Flag::Required) == Flag::Required; }
+    [[nodiscard]] constexpr bool isOptional() const noexcept { return !isRequired(); }
 
     [[nodiscard]] int_fast8_t correctCommand(string_view cmd) const;
     [[nodiscard]] string_view formatArgument(std::span<char> buffer) const;
@@ -66,12 +67,14 @@ class Argument {
     [[nodiscard]] string_view helpText() const { return help; }
 
     const signed char shortCommand;
+    const Flag flags;
     const string_view command;
     const string_view name;
+    const string_view help;
 
  protected:
-    constexpr Argument(signed char shortCommand, string_view command, string_view name, string_view help)
-        : shortCommand(shortCommand), command(command), name(name), help(help) {}
+    constexpr Argument(signed char shortCommand, string_view command, string_view name, Flag flags, string_view help)
+        : shortCommand(shortCommand), flags(flags), command(command), name(name), help(help) {}
 
     template <typename Type>
     [[nodiscard]] static auto fromStringView(string_view str, uint_fast8_t base = 10, Type min = std::numeric_limits<Type>::min(),
@@ -99,10 +102,6 @@ class Argument {
         if (auto pos = str.find_last_not_of(' '); pos != str.npos) str.remove_suffix(str.size() - pos - 1);
         return str;
     }
-
-    const Flag flag{};
-
-    const string_view help;
 };
 
 }  // namespace cli

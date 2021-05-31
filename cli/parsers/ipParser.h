@@ -40,7 +40,7 @@ class IPParser : public Argument {
     using this_type = IPParser;
     using value_type = IP;
 
-    constexpr IPParser(string_view command, string_view name, string_view help) : Argument(-1, command, name, help) {}
+    constexpr IPParser(string_view command, string_view name, Flag flags, string_view help) : Argument(-1, command, name, flags, help) {}
 
     [[nodiscard]] static std::pair<value_type, Status> parse(string_view str, const this_type& object);
 };

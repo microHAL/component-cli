@@ -35,7 +35,7 @@ using namespace std::literals;
 
 TEST_CASE("Test Numeric Parser") {
     {
-        constexpr NumericParser<uint8_t> numeric('n', "number", "varName", "Decode number", 10, 100);
+        constexpr NumericParser<uint8_t> numeric('n', "number", "varName", {}, "Decode number", 10, 100);
         char toShortBuffer[11];
         char buffer[12];
         CHECK(numeric.formatArgument(toShortBuffer) == std::string_view{});
@@ -130,7 +130,7 @@ TEST_CASE("Test Numeric Parser") {
             CHECK(numeric.correctCommand("---number") < 0);
         }
         {
-            NumericParser<uint8_t> numeric(-1, "number", "varName", "Decode number", 10, 100);
+            NumericParser<uint8_t> numeric(-1, "number", "varName", NumericParser<uint8_t>::Flag::Optional, "Decode number", 10, 100);
             char toShortBuffer[17];
             char buffer[18];
             CHECK(numeric.formatArgument(toShortBuffer) == std::string_view{});
@@ -141,23 +141,23 @@ TEST_CASE("Test Numeric Parser") {
 
 TEST_CASE("Test float numeric Parser") {
     {
-        NumericParser<float> numeric('n', "number", "varName", "Decode number", 10.0, 100.0);
+        NumericParser<float> numeric('n', "number", "varName", NumericParser<float>::Flag::Optional, "Decode number", 10.0, 100.0);
         auto [value, status] = numeric.parse("10", numeric);
         CHECK(status == Status::Success);
         CHECK(value == 10.0f);
     }
     {
-        NumericParser<float> numeric('n', "number", "varName", "Decode number", 10.0, 100.0);
+        NumericParser<float> numeric('n', "number", "varName", NumericParser<float>::Flag::Optional, "Decode number", 10.0, 100.0);
         auto [value, status] = numeric.parse("10.5", numeric);
         CHECK(status == Status::Success);
         CHECK(value == 10.5f);
     }
     {
-        NumericParser<float> numeric('n', "number", "varName", "Decode number", 10.0, 100.0);
+        NumericParser<float> numeric('n', "number", "varName", NumericParser<float>::Flag::Optional, "Decode number", 10.0, 100.0);
         CHECK(numeric.parse("9.5", numeric).second == Status::MinViolation);
     }
     {
-        NumericParser<float> numeric('n', "number", "varName", "Decode number", 10.0, 100.0);
+        NumericParser<float> numeric('n', "number", "varName", NumericParser<float>::Flag::Optional, "Decode number", 10.0, 100.0);
         CHECK(numeric.parse("100.5", numeric).second == Status::MaxViolation);
     }
 }

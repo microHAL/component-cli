@@ -62,8 +62,8 @@ class Console : public IODevice {
 };
 
 TEST_CASE("Test Parser") {
-    static constexpr const NumericParser<uint32_t> baud('b', "baudrate", "baud", "Baudrate", 10, 200000);
-    static constexpr const NumericParser<uint8_t> dataBits(-1, "dataBits", "data_bits", "Data bits count.", 1, 9);
+    static constexpr const NumericParser<uint32_t> baud('b', "baudrate", "baud", Argument::Flag::Optional, "Baudrate", 10, 200000);
+    static constexpr const NumericParser<uint8_t> dataBits(-1, "dataBits", "data_bits", Argument::Flag::Optional, "Data bits count.", 1, 9);
 
     ArgumentParser<baud, dataBits> parser("USART", "USART configuration.");
 

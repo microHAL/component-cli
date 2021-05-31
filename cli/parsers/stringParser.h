@@ -39,8 +39,9 @@ class StringParser : public Argument {
     using this_type = StringParser;
     using value_type = std::string;
 
-    constexpr StringParser(signed char shortCommand, string_view command, string_view name, string_view help, uint16_t minLength, uint16_t maxLength)
-        : Argument(shortCommand, command, name, help), maxLength(maxLength), minLength(minLength) {}
+    constexpr StringParser(signed char shortCommand, string_view command, string_view name, Flag flags, string_view help, uint16_t minLength,
+                           uint16_t maxLength)
+        : Argument(shortCommand, command, name, flags, help), maxLength(maxLength), minLength(minLength) {}
 
     [[nodiscard]] static std::pair<string_view, Status> parse(string_view str, const this_type& object);
 

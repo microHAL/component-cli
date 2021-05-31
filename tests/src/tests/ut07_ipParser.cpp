@@ -35,7 +35,7 @@ using namespace cli;
 using namespace std::literals;
 
 TEST_CASE("Test IP Parser") {
-    static constexpr IPParser ipParser("ip", "ip", "Static network addres.");
+    static constexpr IPParser ipParser("ip", "ip", {}, "Static network addres.");
     char buffer[30];
     CHECK(ipParser.formatArgument(buffer) == "[--ip ip]"sv);
     CHECK(ipParser.formatHelpEntry(buffer) == " --ip ip"sv);
@@ -85,7 +85,7 @@ TEST_CASE("Test IP Parser") {
 }
 
 TEST_CASE("Test IP Mask Parser") {
-    constexpr IPMaskParser mask("mask", "mask", "Network mask");
+    constexpr IPMaskParser mask("mask", "mask", {}, "Network mask");
     {
         auto [value, status] = mask.parse("255.255.255.0", mask);
         CHECK(status == Status::Success);

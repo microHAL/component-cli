@@ -43,8 +43,9 @@ class NumericParser : public Argument {
     using this_type = NumericParser<Type>;
     using value_type = Type;
 
-    constexpr NumericParser(char shotCommand, string_view command, string_view name, string_view help, Type min, Type max, uint_fast8_t base = 10)
-        : Argument(shotCommand, command, name, help), base(base), min(min), max(max) {}
+    constexpr NumericParser(char shotCommand, string_view command, string_view name, Flag flags, string_view help, Type min, Type max,
+                            uint_fast8_t base = 10)
+        : Argument(shotCommand, command, name, flags, help), base(base), min(min), max(max) {}
 
     [[nodiscard]] static std::pair<Type, Status> parse(string_view str, const this_type &object) {
         str = removeSpaces(str);
@@ -68,8 +69,8 @@ class NumericParser<float> : public Argument {
     using this_type = NumericParser<float>;
     using value_type = float;
 
-    constexpr NumericParser(char shotCommand, string_view command, string_view name, string_view help, float min, float max)
-        : Argument(shotCommand, command, name, help), min(min), max(max) {}
+    constexpr NumericParser(char shotCommand, string_view command, string_view name, Flag flags, string_view help, float min, float max)
+        : Argument(shotCommand, command, name, flags, help), min(min), max(max) {}
 
     [[nodiscard]] static std::pair<float, Status> parse(string_view str, const this_type &object);
 
@@ -84,8 +85,8 @@ class NumericParser<double> : public Argument {
     using this_type = NumericParser<double>;
     using value_type = double;
 
-    constexpr NumericParser(char shotCommand, string_view command, string_view name, string_view help, double min, double max)
-        : Argument(shotCommand, command, name, help), min(min), max(max) {}
+    constexpr NumericParser(char shotCommand, string_view command, string_view name, Flag flags, string_view help, double min, double max)
+        : Argument(shotCommand, command, name, flags, help), min(min), max(max) {}
 
     [[nodiscard]] static std::pair<double, Status> parse(string_view str, const this_type &object);
 
