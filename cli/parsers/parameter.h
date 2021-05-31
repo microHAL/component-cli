@@ -40,7 +40,7 @@ namespace microhal {
 namespace cli {
 
 namespace implementationDetail {
-enum class Flag : uint8_t { Optional = 0, Required = 0b1, Flag = 0b10 };
+enum class Flag : uint8_t { Optional = 0, Required = 0b1, Flag = 0b10, Enum = 0b100, Variadic = 0b1000 };
 
 constexpr Flag operator|(Flag lhs, Flag rhs) {
     return static_cast<Flag>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
@@ -72,7 +72,7 @@ class Parameter {
 
     [[nodiscard]] int_fast8_t correctCommand(string_view cmd) const;
 
-    [[nodiscard]] string_view formatParameterUsage(std::span<char> buffer) const;
+    [[nodiscard]] virtual string_view formatParameterUsage(std::span<char> buffer) const;
     [[nodiscard]] string_view formatHelpEntry(std::span<char> buffer) const;
 
     const signed char shortCommand;

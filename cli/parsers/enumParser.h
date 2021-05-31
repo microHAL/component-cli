@@ -42,7 +42,7 @@ class EnumParser : public Parameter {
     using value_type = key_t;
 
     constexpr EnumParser(Map &map, char shortCommand, string_view command, Flag flags, string_view help)
-        : Parameter(shortCommand, command, "{...}", flags, help), map(map) {}
+        : Parameter(shortCommand, command, command, flags, help), map(map) {}
 
     [[nodiscard]] constexpr static std::pair<value_type, Status> parse(string_view str, const this_type &object) {
         str = removeSpaces(str);
@@ -53,7 +53,7 @@ class EnumParser : public Parameter {
         return {{}, Status::Error};
     }
 
-    [[nodiscard]] string_view formatArgument(std::span<char> buffer) const {
+    [[nodiscard]] string_view formatParameterUsage(std::span<char> buffer) const final {
         buffer[0] = '[';
         buffer[1] = '-';
         char *ptr = &buffer[3];
