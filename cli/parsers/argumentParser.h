@@ -31,7 +31,7 @@
 #include <bitset>
 #include <span>
 #include <string_view>
-#include <vector>
+#include <tuple>
 #include "argument.h"
 #include "status.h"
 
@@ -86,7 +86,7 @@ class ArgumentParserBase {
     }
 };
 
-template <auto &... parsers>
+template <const auto &... parsers>
 class ArgumentParser : public ArgumentParserBase {
  public:
     using string_view = std::string_view;
@@ -131,15 +131,17 @@ class ArgumentParser : public ArgumentParserBase {
         return std::get<i>(parsedData);
     }
 
-    void showUsage(IODevice &ioDevice) { ArgumentParserBase::showUsage(ioDevice, argumentParsers); }
+    void showUsage(IODevice &ioDevice) {
+        const std::array<const Argument *const, sizeof...(parsers)> argumentParsers{&parsers...};
+        ArgumentParserBase::showUsage(ioDevice, argumentParsers);
+    }
 
  private:
     std::bitset<sizeof...(parsers)> wasParsed{};
     std::tuple<typename std::remove_reference<decltype(parsers)>::type::value_type...> parsedData{};
-    const std::array<const Argument *, sizeof...(parsers)> argumentParsers{&parsers...};
 
     template <size_t i, typename T>
-    Status parseImpl(std::string_view str, const T &arg) {
+    Status parseImpl(const std::string_view str, const T &arg) {
         const auto argument = str.substr(0, str.find(' ', 0));
         if (auto parameterCount = arg.correctCommand(argument); parameterCount >= 0) {
             const auto parameter = getParameters(str.substr(0 + argument.size()), parameterCount);
@@ -153,10 +155,10 @@ class ArgumentParser : public ArgumentParserBase {
         return Status::UnrecognizedParameter;
     }
 
-    template <size_t index, typename T>
-    Status parseImpl(std::string_view str, const T &arg, auto... args) {
+    template <const size_t index, typename T>
+    Status parseImpl(std::string_view str, const T &arg, const auto &... args) {
         const auto argument = str.substr(0, str.find(' ', 0));
-        if (auto parameterCount = arg.correctCommand(argument); parameterCount >= 0) {
+        if (const auto parameterCount = arg.correctCommand(argument); parameterCount >= 0) {
             // argument matched parser
             const auto parameter = getParameters(str.substr(0 + argument.size()), parameterCount);
             auto [value, status] = T::parse(parameter, arg);
