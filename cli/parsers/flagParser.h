@@ -28,8 +28,8 @@
 #ifndef SRC_CLI_PARSERS_FLAGPARSER_H_
 #define SRC_CLI_PARSERS_FLAGPARSER_H_
 
+#include <parsers/parameter.h>
 #include <optional>
-#include "argument.h"
 
 namespace microhal {
 namespace cli {

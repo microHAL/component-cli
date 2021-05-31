@@ -28,11 +28,11 @@
 #ifndef SRC_CLI_PARSERS_ARGUMENTPARSER_H_
 #define SRC_CLI_PARSERS_ARGUMENTPARSER_H_
 
+#include <parsers/parameter.h>
 #include <bitset>
 #include <span>
 #include <string_view>
 #include <tuple>
-#include "argument.h"
 #include "status.h"
 
 //

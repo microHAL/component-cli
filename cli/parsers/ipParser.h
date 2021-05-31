@@ -28,8 +28,8 @@
 #ifndef SRC_CLI_IPPARSER_H_
 #define SRC_CLI_IPPARSER_H_
 
+#include <parsers/parameter.h>
 #include <optional>
-#include "argument.h"
 #include "commonTypes/ip.h"
 
 namespace microhal {

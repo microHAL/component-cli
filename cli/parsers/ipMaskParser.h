@@ -28,8 +28,8 @@
 #ifndef SRC_CLI_PARSERS_IPMASKPARSER_H_
 #define SRC_CLI_PARSERS_IPMASKPARSER_H_
 
+#include <parsers/parameter.h>
 #include <optional>
-#include "argument.h"
 #include "commonTypes/ip.h"
 #include "status.h"
 

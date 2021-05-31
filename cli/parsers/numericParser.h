@@ -28,11 +28,11 @@
 #ifndef SRC_CLI_NUMERICPARSER_H_
 #define SRC_CLI_NUMERICPARSER_H_
 
+#include <parsers/parameter.h>
 #include <cmath>
 #include <cstdint>
 #include <string_view>
 #include <utility>
-#include "argument.h"
 
 namespace microhal {
 namespace cli {
