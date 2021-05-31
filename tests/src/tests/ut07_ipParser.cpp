@@ -37,7 +37,7 @@ using namespace std::literals;
 TEST_CASE("Test IP Parser") {
     static constexpr IPParser ipParser("ip", "ip", {}, "Static network addres.");
     char buffer[30];
-    CHECK(ipParser.formatArgument(buffer) == "[--ip ip]"sv);
+    CHECK(ipParser.formatParameterUsage(buffer) == "[--ip ip]"sv);
     CHECK(ipParser.formatHelpEntry(buffer) == " --ip ip"sv);
 
     {

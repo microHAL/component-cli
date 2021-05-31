@@ -52,7 +52,17 @@ constexpr Flag operator&(Flag lhs, Flag rhs) {
 
 }  // namespace implementationDetail
 
-class Argument {
+// new terminology:
+// ie 1:
+// cmd --set 1
+//   cmd -> command
+//   --set 1 -> Parameter 'set' with argument 1
+// ie 2:
+// mmm --reset
+//   mmm -> command
+//   --reset -> Parameter 'reset' without argument
+
+class Parameter {
  public:
     using string_view = std::string_view;
     using Flag = implementationDetail::Flag;
@@ -61,10 +71,9 @@ class Argument {
     [[nodiscard]] constexpr bool isOptional() const noexcept { return !isRequired(); }
 
     [[nodiscard]] int_fast8_t correctCommand(string_view cmd) const;
-    [[nodiscard]] string_view formatArgument(std::span<char> buffer) const;
 
+    [[nodiscard]] string_view formatParameterUsage(std::span<char> buffer) const;
     [[nodiscard]] string_view formatHelpEntry(std::span<char> buffer) const;
-    [[nodiscard]] string_view helpText() const { return help; }
 
     const signed char shortCommand;
     const Flag flags;
@@ -73,7 +82,7 @@ class Argument {
     const string_view help;
 
  protected:
-    constexpr Argument(signed char shortCommand, string_view command, string_view name, Flag flags, string_view help)
+    constexpr Parameter(signed char shortCommand, string_view command, string_view name, Flag flags, string_view help)
         : shortCommand(shortCommand), flags(flags), command(command), name(name), help(help) {}
 
     template <typename Type>

@@ -38,14 +38,14 @@ namespace microhal {
 namespace cli {
 
 template <typename Type>
-class NumericParser : public Argument {
+class NumericParser : public Parameter {
  public:
     using this_type = NumericParser<Type>;
     using value_type = Type;
 
-    constexpr NumericParser(char shotCommand, string_view command, string_view name, Flag flags, string_view help, Type min, Type max,
+    consteval NumericParser(char shotCommand, string_view command, string_view name, Flag flags, string_view help, Type min, Type max,
                             uint_fast8_t base = 10)
-        : Argument(shotCommand, command, name, flags, help), base(base), min(min), max(max) {}
+        : Parameter(shotCommand, command, name, flags, help), base(base), min(min), max(max) {}
 
     [[nodiscard]] static std::pair<Type, Status> parse(string_view str, const this_type &object) {
         str = removeSpaces(str);
@@ -53,7 +53,7 @@ class NumericParser : public Argument {
         // spaces in the middle of data are not allowed, return error
         if (str.find(' ') != str.npos) return {{}, Status::IncorectArgument};
 
-        auto [value, error] = Argument::fromStringView<Type>(str, object.base, object.min, object.max);
+        auto [value, error] = Parameter::fromStringView<Type>(str, object.base, object.min, object.max);
         return {value, error};
     }
 
@@ -64,13 +64,13 @@ class NumericParser : public Argument {
 };
 
 template <>
-class NumericParser<float> : public Argument {
+class NumericParser<float> : public Parameter {
  public:
     using this_type = NumericParser<float>;
     using value_type = float;
 
     constexpr NumericParser(char shotCommand, string_view command, string_view name, Flag flags, string_view help, float min, float max)
-        : Argument(shotCommand, command, name, flags, help), min(min), max(max) {}
+        : Parameter(shotCommand, command, name, flags, help), min(min), max(max) {}
 
     [[nodiscard]] static std::pair<float, Status> parse(string_view str, const this_type &object);
 
@@ -80,13 +80,13 @@ class NumericParser<float> : public Argument {
 };
 
 template <>
-class NumericParser<double> : public Argument {
+class NumericParser<double> : public Parameter {
  public:
     using this_type = NumericParser<double>;
     using value_type = double;
 
     constexpr NumericParser(char shotCommand, string_view command, string_view name, Flag flags, string_view help, double min, double max)
-        : Argument(shotCommand, command, name, flags, help), min(min), max(max) {}
+        : Parameter(shotCommand, command, name, flags, help), min(min), max(max) {}
 
     [[nodiscard]] static std::pair<double, Status> parse(string_view str, const this_type &object);
 

@@ -33,14 +33,15 @@ namespace cli {
 
 enum class Status {
     Success = 0,
-    UnrecognizedParameter = 0b10,
-    MaxViolation = 0b100,           // argument value bigger than permitted (set biggest)
-    MinViolation = 0b1000,          // argument value lesser than permitted (set smallest)
-    LengthViolation = 0b1'0000,     // argument string do not suit given buffer (done nothing)
+    MissingParameter = 0b1,         // required parameter was not provided
+    UnrecognizedParameter = 0b10,   // provided parameter that is not specified (additional) or some error in parameter text ie. typo
+    MaxViolation = 0b100,           // argument value bigger than permitted
+    MinViolation = 0b1000,          // argument value lesser than permitted
+    LengthViolation = 0b1'0000,     // argument string do not suit given buffer
     MissingArgument = 0b10'0000,    // no argument given
     IncorectArgument = 0b100'0000,  // argument has wrong format
-    NoArguments = 0b1000'0000,
-    HelpRequested = 1'0000'0000,
+    HelpRequested = 0b1000'0000,
+    NoParameters = 0b1'0000'0000,  // no parameters provided
     Error = ~Success,
 };
 

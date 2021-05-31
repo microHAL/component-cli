@@ -35,14 +35,14 @@ namespace microhal {
 namespace cli {
 
 template <typename Map>
-class EnumParser : public Argument {
+class EnumParser : public Parameter {
  public:
     using key_t = typename Map::key_t;
     using this_type = EnumParser<Map>;
     using value_type = key_t;
 
     constexpr EnumParser(Map &map, char shortCommand, string_view command, Flag flags, string_view help)
-        : Argument(shortCommand, command, "{...}", flags, help), map(map) {}
+        : Parameter(shortCommand, command, "{...}", flags, help), map(map) {}
 
     [[nodiscard]] constexpr static std::pair<value_type, Status> parse(string_view str, const this_type &object) {
         str = removeSpaces(str);

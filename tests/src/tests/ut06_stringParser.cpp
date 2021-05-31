@@ -34,7 +34,7 @@ using namespace cli;
 using namespace std::literals;
 
 TEST_CASE("Test Flag Parser") {
-    StringParser str('s', "str", "string", {}, "String parser help text", 1, 20);
+    constexpr StringParser str('s', "str", "string", {}, "String parser help text", 1, 20);
     auto [value, status] = str.parse("Parsed string", str);
     CHECK(status == Status::Success);
     CHECK(value == "Parsed string"sv);

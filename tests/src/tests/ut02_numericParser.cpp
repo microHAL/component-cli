@@ -38,12 +38,12 @@ TEST_CASE("Test Numeric Parser") {
         constexpr NumericParser<uint8_t> numeric('n', "number", "varName", {}, "Decode number", 10, 100);
         char toShortBuffer[11];
         char buffer[12];
-        CHECK(numeric.formatArgument(toShortBuffer) == std::string_view{});
-        CHECK(numeric.formatArgument(buffer) == "[-n varName]"sv);
+        CHECK(numeric.formatParameterUsage(toShortBuffer) == std::string_view{});
+        CHECK(numeric.formatParameterUsage(buffer) == "[-n varName]"sv);
         {
             char buffer[29];
             CHECK(numeric.formatHelpEntry(buffer) == " -n varName, --number varName"sv);
-            CHECK(numeric.helpText() == "Decode number"sv);
+            CHECK(numeric.help == "Decode number"sv);
         }
         auto [value, status] = numeric.parse("10", numeric);
         CHECK(status == Status::Success);
@@ -130,11 +130,11 @@ TEST_CASE("Test Numeric Parser") {
             CHECK(numeric.correctCommand("---number") < 0);
         }
         {
-            NumericParser<uint8_t> numeric(-1, "number", "varName", NumericParser<uint8_t>::Flag::Optional, "Decode number", 10, 100);
+            constexpr NumericParser<uint8_t> numeric(-1, "number", "varName", NumericParser<uint8_t>::Flag::Optional, "Decode number", 10, 100);
             char toShortBuffer[17];
             char buffer[18];
-            CHECK(numeric.formatArgument(toShortBuffer) == std::string_view{});
-            CHECK(numeric.formatArgument(buffer) == "[--number varName]"sv);
+            CHECK(numeric.formatParameterUsage(toShortBuffer) == std::string_view{});
+            CHECK(numeric.formatParameterUsage(buffer) == "[--number varName]"sv);
         }
     }
 }

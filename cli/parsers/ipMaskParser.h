@@ -36,12 +36,12 @@
 namespace microhal {
 namespace cli {
 
-class IPMaskParser : public Argument {
+class IPMaskParser : public Parameter {
  public:
     using this_type = IPMaskParser;
     using value_type = IP;
 
-    constexpr IPMaskParser(string_view command, string_view name, Flag flags, string_view help) : Argument(-1, command, name, flags, help) {}
+    consteval IPMaskParser(string_view command, string_view name, Flag flags, string_view help) : Parameter(-1, command, name, flags, help) {}
 
     [[nodiscard]] static std::pair<value_type, Status> parse(string_view str, const this_type& object);
 

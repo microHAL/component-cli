@@ -33,7 +33,7 @@ using namespace std::literals;
 namespace microhal {
 namespace cli {
 
-void ArgumentParserBase::showUsage(IODevice &ioDevice, const std::span<const Argument *const> arguments) const {
+void ArgumentParserBase::showUsage(IODevice &ioDevice, const std::span<const Parameter *const> arguments) const {
     constexpr const std::string_view usage = "usage: ";
     constexpr const std::string_view endl = "\n\r";
     ioDevice.write(usage);
@@ -41,7 +41,7 @@ void ArgumentParserBase::showUsage(IODevice &ioDevice, const std::span<const Arg
     for (auto argument : arguments) {
         ioDevice.putChar(' ');
         char buffer[30];
-        auto result = argument->formatArgument(buffer);
+        auto result = argument->formatParameterUsage(buffer);
         ioDevice.write(result);
     }
     ioDevice.write(endl);
@@ -63,7 +63,7 @@ void ArgumentParserBase::showUsage(IODevice &ioDevice, const std::span<const Arg
         } else {
             ioDevice.write(spaces.substr(0, spaces.size() - result.size()));
         }
-        ioDevice.write(argument->helpText());
+        ioDevice.write(argument->help);
     }
     ioDevice.write(endl);
 }

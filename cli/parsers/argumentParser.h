@@ -35,6 +35,8 @@
 #include "argument.h"
 #include "status.h"
 
+//
+
 namespace microhal {
 namespace cli {
 
@@ -71,7 +73,7 @@ class ArgumentParserBase {
 
     static bool isHelpArgument(std::string_view);
     static std::string_view getParameters(std::string_view arguments, int8_t argumentsCount);
-    void showUsage(IODevice &ioDevice, const std::span<const Argument *const> arguments) const;
+    void showUsage(IODevice &ioDevice, const std::span<const Parameter *const> arguments) const;
 
  protected:
     std::string_view name;
@@ -97,7 +99,7 @@ class ArgumentParser : public ArgumentParserBase {
         using namespace std::literals;
         // remove leading and trailing spaces
         argumentsString = removeSpaces(argumentsString);
-        if (argumentsString.size() == 0 && sizeof...(parsers) != 0) return Status::NoArguments;
+        if (argumentsString.size() == 0 && sizeof...(parsers) != 0) return Status::NoParameters;
         wasParsed.reset();
         // decode all parameters
         do {
@@ -122,7 +124,7 @@ class ArgumentParser : public ArgumentParserBase {
         } while (argumentsString.size());
 
         if (!wasRequiredArgumentsParsed<0>(parsers...)) {
-            return Status::MissingArgument;
+            return Status::MissingParameter;
         }
         return Status::Success;
     }
@@ -135,7 +137,7 @@ class ArgumentParser : public ArgumentParserBase {
     }
 
     void showUsage(IODevice &ioDevice) {
-        const std::array<const Argument *const, sizeof...(parsers)> argumentParsers{&parsers...};
+        const std::array<const Parameter *const, sizeof...(parsers)> argumentParsers{&parsers...};
         ArgumentParserBase::showUsage(ioDevice, argumentParsers);
     }
 
