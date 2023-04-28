@@ -38,16 +38,16 @@ using namespace std::literals;
 
 class Console : public IODevice {
  public:
-    bool open(OpenMode mode) noexcept final { return true; }
+    int open([[maybe_unused]] OpenMode mode) noexcept final { return true; }
 
     void close() noexcept final {}
-    bool isOpen() const noexcept { return true; }
+    int isOpen() const noexcept { return true; }
 
-    size_t read(char *buffer, size_t length) noexcept final { return 0; }
+    ssize_t read([[maybe_unused]] char *buffer, [[maybe_unused]] size_t length) noexcept final { return 0; }
 
-    size_t availableBytes() const noexcept final { return 0; }
+    ssize_t availableBytes() const noexcept final { return 0; }
 
-    size_t write(const char *data, size_t length) noexcept final {
+    ssize_t write(const char *data, size_t length) noexcept final {
         const size_t bufferSpace = sizeof(buffer) - bufferPos;
         if (bufferSpace < length) length = bufferSpace;
         std::copy_n(data, length, &buffer[bufferPos]);
@@ -62,17 +62,15 @@ class Console : public IODevice {
 };
 
 TEST_CASE("Test Parser") {
-    NumericParser<uint32_t> baud('b', "baudrate", "baud", "Baudrate", 10, 200000);
-    NumericParser<uint8_t> dataBits(-1, "dataBits", "data_bits", "Data bits count.", 1, 9);
+    static constexpr const NumericParser<uint32_t> baud('b', "baudrate", "baud", Parameter::Flag::Optional, "Baudrate", 10, 200000);
+    static constexpr const NumericParser<uint8_t> dataBits(-1, "dataBits", "data_bits", Parameter::Flag::Optional, "Data bits count.", 1, 9);
 
-    ArgumentParser parser("USART", "USART configuration.");
-    parser.addArgument(baud);
-    parser.addArgument(dataBits);
+    ArgumentParser<baud, dataBits> parser("USART", "USART configuration.");
 
     IODeviceNull ioDevice;
     CHECK(parser.parse("-b 115200 --dataBits 8", ioDevice) == Status::Success);
-    CHECK(baud.value() == 115200);
-    CHECK(dataBits.value() == 8);
+    CHECK(parser.get<{"baud"}>() == 115200);
+    CHECK(parser.get<{"data_bits"}>() == 8);
 
     const std::string_view result =
         "usage: USART [-b baud] [--dataBits data_bits]\n\r"

@@ -38,13 +38,14 @@ TEST_CASE("Test Enum Parser") {
     enum class Variants { Variant1, Variant2 };
     static constexpr const EnumMap<Variants, std::string_view, 2> map{{{{Variants::Variant1, "Variant1"sv}, {Variants::Variant2, "Variant2"sv}}}};
 
-    EnumParser enumParser(map, 'v', "variant"sv, "Select option"sv);
+    constexpr EnumParser enumParser(map, 'v', "variant"sv, Parameter::Flag::Optional, "Select option"sv);
     char buffer[30];
-    CHECK(enumParser.formatArgument(buffer) == "[-v {Variant1,Variant2}]"sv);
+    CHECK(enumParser.formatParameterUsage(buffer) == "[-v {Variant1,Variant2}]"sv);
     CHECK(enumParser.formatHelpEntry(buffer) == " -v {...}, --variant {...}"sv);
-
-    CHECK(enumParser.parse("Variant1") == Status::Success);
-    CHECK(enumParser.key() == Variants::Variant1);
-
-    CHECK(enumParser.parse("Variant") == Status::Error);
+    {
+        auto [value, status] = enumParser.parse("Variant1", enumParser);
+        CHECK(status == Status::Success);
+        CHECK(value == Variants::Variant1);
+    }
+    CHECK(enumParser.parse("Variant", enumParser).second == Status::Error);
 }

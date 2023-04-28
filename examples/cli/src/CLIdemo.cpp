@@ -113,27 +113,24 @@ class CarSet : public Car {
 
  protected:
     int execute(std::string_view parameters, IODevice& port) final {
-        cli::StringParser color(-1, "color", "color", "color name as string", 1, 40);
-        cli::NumericParser<float> speed(-1, "speed", "speed", "max speed of car", 50.0f, 400.0f);
-        cli::NumericParser<int> gears(-1, "gears", "gears", "gears count", 3, 20);
-        cli::ArgumentParser parser("set", "Set car parameters");
-        parser.addArgument(color);
-        parser.addArgument(speed);
-        parser.addArgument(gears);
+        constexpr static cli::StringParser color(-1, "color", "color", {}, "color name as string", 1, 40);
+        constexpr static cli::NumericParser<float> speed(-1, "speed", "speed", {}, "max speed of car", 50.0f, 400.0f);
+        constexpr static cli::NumericParser<int> gears(-1, "gears", "gears", {}, "gears count", 3, 20);
+        cli::ArgumentParser<color, speed, gears> parser("set", "Set car parameters");
         if (auto status = parser.parse(parameters, port); status == cli::Status::Success) {
             port.write("\tSet color to ");
-            port.write(color.value());
+            port.write(parser.get<{"color"}>());
             port.write(".\n");
-            setColor(color.value());
+            setColor(parser.get<{"color"}>());
 
             char txt[60];
-            snprintf(txt, 60, "\tSet maxspeed to %f.\n", speed.value());
+            snprintf(txt, 60, "\tSet maxspeed to %f.\n", parser.get<{"speed"}>());
             port.write(txt);
-            maxSpeed = speed.value();
+            maxSpeed = parser.get<{"speed"}>();
 
-            snprintf(txt, 60, "\tSet gears count to %d.\n", gears.value());
+            snprintf(txt, 60, "\tSet gears count to %d.\n", parser.get<{"gears"}>());
             port.write(txt);
-            gearsCnt = gears.value();
+            gearsCnt = parser.get<{"gears"}>();
         } else if (status != cli::Status::HelpRequested) {
             port.write("Incorrect argument.");
         }
@@ -227,17 +224,14 @@ class ClockSet : public Clock {
 
  protected:
     int execute(std::string_view parameters, IODevice& port) final {
-        cli::NumericParser<int> sec('s', {}, "seconds", "Seconds from 0 to 59.", 0, 59);
-        cli::NumericParser<int> min('m', {}, "minutes", "Minutes from 0 to 59.", 0, 59);
-        cli::NumericParser<int> hrs(-1, "hr", "hours", "Hours from 0 to 23.", 0, 23);
-        cli::ArgumentParser parser("set", "Set current time.");
-        parser.addArgument(sec);
-        parser.addArgument(min);
-        parser.addArgument(hrs);
+        static constexpr cli::NumericParser<int> sec('s', {}, "seconds", {}, "Seconds from 0 to 59.", 0, 59);
+        static constexpr cli::NumericParser<int> min('m', {}, "minutes", {}, "Minutes from 0 to 59.", 0, 59);
+        static constexpr cli::NumericParser<int> hrs(-1, "hr", "hours", {}, "Hours from 0 to 23.", 0, 23);
+        cli::ArgumentParser<sec, min, hrs> parser("set", "Set current time.");
         if (parser.parse(parameters, port) == cli::Status::Success) {
-            seconds = sec.value();
-            minutes = min.value();
-            hours = hrs.value();
+            seconds = parser.get<{"seconds"}>();
+            minutes = parser.get<{"minutes"}>();
+            hours = parser.get<{"hours"}>();
 
             char txt[60];
             snprintf(txt, 60, "\tCurrent time is %02d:%02d:%02d\n", hours, minutes, seconds);
